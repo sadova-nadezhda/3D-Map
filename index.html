@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive City Map</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene-container"></div>
+
+      <div id="labels-root"></div>
+
+      <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+          <h2 id="modalTitle">Город</h2>
+          <p id="modalDescription">Описание города</p>
+          <button id="closeModal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
