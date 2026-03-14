@@ -92,8 +92,25 @@ const cityPositions = new Map();
 
 let activeCity = null;
 let vanRoot = null;
-let targetPosition = null;
-let previousPosition = new THREE.Vector3();
+let carInstance = null;
+
+let activeCurve = null;
+let routeProgress = 0;
+let isMoving = false;
+let routeLine = null;
+
+const ROUTE_HEIGHT = 0.03;
+const CURVE_HEIGHT = 0.18;
+const MOVE_SPEED = 0.22;
+const CAR_Y_OFFSET = 0.1;
+const CAR_SCALE = 0.15;
+
+// куда смотрит "перед" модели в исходном glb
+// пробуй: 0, Math.PI, Math.PI / 2, -Math.PI / 2
+const CAR_FORWARD_OFFSET = Math.PI;
+
+// плавность поворота: чем больше, тем быстрее доворачивает
+const TURN_SPEED = 4.5;
 
 function showModal(cityKey) {
   const city = CITY_CONTENT[cityKey];
@@ -114,28 +131,6 @@ function setActiveLabel(cityKey) {
   });
 }
 
-function updateMarkerStyles(cityKey) {
-  clickableMeshes.forEach((mesh) => {
-    const isActive = mesh.userData.cityKey === cityKey;
-    mesh.material.color.set(isActive ? '#ef4444' : '#ffffff');
-    mesh.material.emissive.set(isActive ? '#ef4444' : '#666666');
-  });
-}
-
-function selectCity(cityKey) {
-  if (!CITY_CONTENT[cityKey]) return;
-
-  activeCity = cityKey;
-  setActiveLabel(cityKey);
-  updateMarkerStyles(cityKey);
-  showModal(cityKey);
-
-  const nextPoint = cityPositions.get(cityKey);
-  if (nextPoint) {
-    targetPosition = nextPoint.clone();
-  }
-}
-
 function createLabel(cityKey, title) {
   const button = document.createElement('button');
   button.className = 'city-label';
@@ -145,16 +140,15 @@ function createLabel(cityKey, title) {
   cityLabels.set(cityKey, button);
 }
 
-function createMarker(cityKey, position) {
-  const geometry = new THREE.SphereGeometry(0.06, 24, 24);
-  const material = new THREE.MeshStandardMaterial({
-    color: '#ffffff',
-    emissive: '#666666',
-    emissiveIntensity: 0.8,
+function createInvisibleMarker(cityKey, position) {
+  const geometry = new THREE.SphereGeometry(0.08, 16, 16);
+  const material = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
   });
 
   const marker = new THREE.Mesh(geometry, material);
-  marker.castShadow = true;
   marker.position.copy(position);
   marker.position.y += 0.12;
   marker.userData.cityKey = cityKey;
@@ -203,6 +197,74 @@ function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function clearRouteLine() {
+  if (!routeLine) return;
+
+  scene.remove(routeLine);
+  routeLine.geometry.dispose();
+  routeLine.material.dispose();
+  routeLine = null;
+}
+
+function startRoute(start, end) {
+  const startPoint = start.clone();
+  const endPoint = end.clone();
+
+  startPoint.y += ROUTE_HEIGHT;
+  endPoint.y += ROUTE_HEIGHT;
+
+  const midPoint = startPoint.clone().lerp(endPoint, 0.5);
+  midPoint.y += CURVE_HEIGHT;
+
+  activeCurve = new THREE.CatmullRomCurve3([
+    startPoint,
+    midPoint,
+    endPoint,
+  ]);
+
+  const points = activeCurve.getPoints(80);
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.LineDashedMaterial({
+    color: 0xff5533,
+    dashSize: 0.12,
+    gapSize: 0.08,
+  });
+
+  clearRouteLine();
+
+  routeLine = new THREE.Line(geometry, material);
+  routeLine.computeLineDistances();
+  scene.add(routeLine);
+
+  routeProgress = 0;
+  isMoving = true;
+}
+
+function selectCity(cityKey, skipRoute = false) {
+  if (!CITY_CONTENT[cityKey]) return;
+
+  const sameCity = activeCity === cityKey;
+  activeCity = cityKey;
+
+  setActiveLabel(cityKey);
+  showModal(cityKey);
+
+  const nextPoint = cityPositions.get(cityKey);
+  if (!nextPoint || !vanRoot) return;
+
+  if (skipRoute) {
+    vanRoot.position.copy(nextPoint);
+    return;
+  }
+
+  if (sameCity && !isMoving) return;
+
+  const start = vanRoot.position.clone();
+  const end = nextPoint.clone();
+
+  startRoute(start, end);
+}
+
 async function loadScene() {
   const [mapGltf, carGltf] = await Promise.all([
     loader.loadAsync('/models/MAP.glb'),
@@ -230,7 +292,7 @@ async function loadScene() {
       });
 
       cityPositions.set(obj.name, worldPosition.clone());
-      // createMarker(obj.name, worldPosition.clone());
+      createInvisibleMarker(obj.name, worldPosition.clone());
       createLabel(obj.name, CITY_CONTENT[obj.name].title);
     }
   });
@@ -249,27 +311,27 @@ async function loadScene() {
     }
   });
 
-  const CAR_Y_OFFSET = 0.1;
-
   vanRoot = new THREE.Group();
 
-  const carInstance = carModel.clone();
+  carInstance = carModel.clone();
   carInstance.position.set(0, CAR_Y_OFFSET, 0);
-  carInstance.scale.set(0.15, 0.15, 0.15);
+  carInstance.scale.set(CAR_SCALE, CAR_SCALE, CAR_SCALE);
+  // carInstance.rotation.set(-Math.PI / 2, CAR_FORWARD_OFFSET, 0);
+  carInstance.rotation.x = -Math.PI / 2;
+  carInstance.rotation.y = CAR_FORWARD_OFFSET;
+  carInstance.rotation.z = 0;
 
   vanRoot.add(carInstance);
   scene.add(vanRoot);
-
 
   if (cityPoints.length) {
     const firstCityKey = cityPoints[0].key;
     const firstPosition = cityPositions.get(firstCityKey).clone();
 
     vanRoot.position.copy(firstPosition);
-    previousPosition.copy(firstPosition);
-    targetPosition = firstPosition.clone();
-
-    selectCity(firstCityKey);
+    setActiveLabel(firstCityKey);
+    showModal(firstCityKey);
+    activeCity = firstCityKey;
   }
 }
 
@@ -278,22 +340,37 @@ function animate() {
 
   const delta = clock.getDelta();
 
-  if (vanRoot && targetPosition) {
-    const current = vanRoot.position;
-    const distance = current.distanceTo(targetPosition);
+  if (vanRoot && activeCurve && isMoving) {
+    routeProgress += delta * MOVE_SPEED;
 
-    if (distance > 0.001) {
-      const speed = 2.4;
-      const alpha = 1 - Math.exp(-speed * delta);
-      current.lerp(targetPosition, alpha);
+    if (routeProgress >= 1) {
+      routeProgress = 1;
+      isMoving = false;
+    }
 
-      const direction = targetPosition.clone().sub(previousPosition);
-      if (direction.lengthSq() > 0.00001) {
-        const angle = Math.atan2(direction.x, direction.z);
-        vanRoot.rotation.y = angle;
-      }
+    const position = activeCurve.getPointAt(routeProgress);
+    vanRoot.position.copy(position);
 
-      previousPosition.copy(current);
+    const lookAheadT = Math.min(routeProgress + 0.03, 1);
+    const lookAtPoint = activeCurve.getPointAt(lookAheadT);
+
+    const direction = lookAtPoint.clone().sub(vanRoot.position);
+    direction.y = 0;
+
+    if (direction.lengthSq() > 0.000001) {
+      direction.normalize();
+
+      const targetAngle = Math.atan2(direction.x, direction.z);
+
+      let angleDiff = targetAngle - vanRoot.rotation.y;
+      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+
+      vanRoot.rotation.y += angleDiff * Math.min(1, TURN_SPEED * delta);
+    }
+
+    if (!isMoving) {
+      const finalPoint = activeCurve.getPointAt(1);
+      vanRoot.position.copy(finalPoint);
     }
   }
 
@@ -303,9 +380,11 @@ function animate() {
 }
 
 closeModalButton.addEventListener('click', hideModal);
+
 modalOverlay.addEventListener('click', (event) => {
   if (event.target === modalOverlay) hideModal();
 });
+
 renderer.domElement.addEventListener('pointerdown', onPointerDown);
 window.addEventListener('resize', onResize);
 
