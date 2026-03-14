@@ -107,7 +107,7 @@ const CAR_SCALE = 0.15;
 
 // куда смотрит "перед" модели в исходном glb
 // пробуй: 0, Math.PI, Math.PI / 2, -Math.PI / 2
-const CAR_FORWARD_OFFSET = Math.PI;
+const CAR_FORWARD_OFFSET = -Math.PI;
 
 // плавность поворота: чем больше, тем быстрее доворачивает
 const TURN_SPEED = 4.5;
@@ -267,7 +267,7 @@ function selectCity(cityKey, skipRoute = false) {
 
 async function loadScene() {
   const [mapGltf, carGltf] = await Promise.all([
-    loader.loadAsync('/models/MAP.glb'),
+    loader.loadAsync('/models/map.glb'),
     loader.loadAsync('/models/car.glb'),
   ]);
 
