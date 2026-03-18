@@ -54,9 +54,16 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000,
 );
-camera.position.set(3.5, 4.5, 6);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+// фиксированный ракурс как на референсе
+// camera.position.set(0, 7.2, 8.8);
+camera.position.set(0, 4, 4);
+;
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true,
+});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -64,12 +71,12 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.minDistance = 3;
-controls.maxDistance = 15;
-controls.maxPolarAngle = Math.PI / 2.1;
-controls.target.set(0, 0.6, 0);
+controls.enableDamping = false;
+controls.enableRotate = false;
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.target.set(0, 0.2, 0);
+controls.update();
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
 scene.add(ambientLight);
@@ -93,6 +100,7 @@ const cityPositions = new Map();
 let activeCity = null;
 let vanRoot = null;
 let carInstance = null;
+let mapRoot = null;
 
 let activeCurve = null;
 let routeProgress = 0;
@@ -104,13 +112,15 @@ const CURVE_HEIGHT = 0.18;
 const MOVE_SPEED = 0.22;
 const CAR_Y_OFFSET = 0.1;
 const CAR_SCALE = 0.15;
-
-// куда смотрит "перед" модели в исходном glb
-// пробуй: 0, Math.PI, Math.PI / 2, -Math.PI / 2
-const CAR_FORWARD_OFFSET = -Math.PI;
-
-// плавность поворота: чем больше, тем быстрее доворачивает
 const TURN_SPEED = 4.5;
+const VAN_OFFSET = new THREE.Vector3(0.18, 0, 0);
+const CAR_MODEL_ROTATION = {
+  x: -Math.PI / 2,
+  y: Math.PI,
+  z: Math.PI / 2,
+};
+
+let mapCenter = new THREE.Vector3();
 
 function showModal(cityKey) {
   const city = CITY_CONTENT[cityKey];
@@ -166,8 +176,15 @@ function updateLabels() {
     projected.y += 0.28;
     projected.project(camera);
 
-    const isVisible = projected.z < 1;
+    const isVisible =
+      projected.z < 1 &&
+      projected.x >= -1.2 &&
+      projected.x <= 1.2 &&
+      projected.y >= -1.2 &&
+      projected.y <= 1.2;
+
     label.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) return;
 
     const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
     const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
@@ -195,6 +212,7 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updateLabels();
 }
 
 function clearRouteLine() {
@@ -210,17 +228,45 @@ function startRoute(start, end) {
   const startPoint = start.clone();
   const endPoint = end.clone();
 
+  // держим маршрут чуть выше поверхности карты
   startPoint.y += ROUTE_HEIGHT;
   endPoint.y += ROUTE_HEIGHT;
 
-  const midPoint = startPoint.clone().lerp(endPoint, 0.5);
-  midPoint.y += CURVE_HEIGHT;
+  const direction = endPoint.clone().sub(startPoint);
+  direction.y = 0;
 
-  activeCurve = new THREE.CatmullRomCurve3([
+  const distance = direction.length();
+
+  let controlPoint = startPoint.clone().lerp(endPoint, 0.5);
+
+  if (distance > 0.001) {
+    direction.normalize();
+
+    // два возможных перпендикуляра
+    const normalA = new THREE.Vector3(-direction.z, 0, direction.x);
+    const normalB = normalA.clone().multiplyScalar(-1);
+
+    // уменьшаем изгиб, чтобы не уводило за края
+    const curveOffset = Math.min(distance * 0.12, 0.22);
+
+    const candidateA = controlPoint.clone().add(normalA.clone().multiplyScalar(curveOffset));
+    const candidateB = controlPoint.clone().add(normalB.clone().multiplyScalar(curveOffset));
+
+    // выбираем вариант, который ближе к центру карты
+    const distA = candidateA.distanceToSquared(mapCenter);
+    const distB = candidateB.distanceToSquared(mapCenter);
+
+    controlPoint.copy(distA < distB ? candidateA : candidateB);
+  }
+
+  // без подъема вверх
+  controlPoint.y = startPoint.y;
+
+  activeCurve = new THREE.QuadraticBezierCurve3(
     startPoint,
-    midPoint,
-    endPoint,
-  ]);
+    controlPoint,
+    endPoint
+  );
 
   const points = activeCurve.getPoints(80);
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -249,8 +295,10 @@ function selectCity(cityKey, skipRoute = false) {
   setActiveLabel(cityKey);
   showModal(cityKey);
 
-  const nextPoint = cityPositions.get(cityKey);
-  if (!nextPoint || !vanRoot) return;
+  const point = cityPositions.get(cityKey);
+  if (!point || !vanRoot) return;
+
+  const nextPoint = point.clone().add(VAN_OFFSET);
 
   if (skipRoute) {
     vanRoot.position.copy(nextPoint);
@@ -267,16 +315,36 @@ function selectCity(cityKey, skipRoute = false) {
 
 async function loadScene() {
   const [mapGltf, carGltf] = await Promise.all([
-    loader.loadAsync('/models/map.glb'),
-    loader.loadAsync('/models/car.glb'),
+    loader.loadAsync('/models/kz_map-main.glb'),
+    loader.loadAsync('/models/car_main.glb'),
   ]);
 
+  mapRoot = new THREE.Group();
   const mapScene = mapGltf.scene;
-  scene.add(mapScene);
+  mapRoot.add(mapScene);
+  scene.add(mapRoot);
 
-  mapScene.updateWorldMatrix(true, true);
+  // ВАЖНО:
+  // подгоняем карту под нужный ракурс как на втором фото
+  mapRoot.rotation.x = 0;
+  mapRoot.rotation.y = -0.55;
+  mapRoot.rotation.z = 0;
 
-  mapScene.traverse((obj) => {
+  mapRoot.position.set(0, 0, 0);
+  mapRoot.scale.set(1, 1, 1);
+
+  mapRoot.updateWorldMatrix(true, true);
+
+  const box = new THREE.Box3().setFromObject(mapRoot);
+  const center = box.getCenter(new THREE.Vector3());
+
+  mapCenter.copy(center);
+
+  controls.target.copy(center);
+  camera.lookAt(center);
+  controls.update();
+
+  mapRoot.traverse((obj) => {
     if (obj.isMesh) {
       obj.castShadow = true;
       obj.receiveShadow = true;
@@ -313,26 +381,32 @@ async function loadScene() {
 
   vanRoot = new THREE.Group();
 
-  carInstance = carModel.clone();
-  carInstance.position.set(0, CAR_Y_OFFSET, 0);
-  carInstance.scale.set(CAR_SCALE, CAR_SCALE, CAR_SCALE);
-  // carInstance.rotation.set(-Math.PI / 2, CAR_FORWARD_OFFSET, 0);
-  carInstance.rotation.x = -Math.PI / 2;
-  carInstance.rotation.y = CAR_FORWARD_OFFSET;
-  carInstance.rotation.z = 0;
+  const carPivot = new THREE.Group();
+  carPivot.position.set(0.1, -0.5, 0);
 
-  vanRoot.add(carInstance);
+  carInstance = carModel.clone();
+  carInstance.scale.set(CAR_SCALE, CAR_SCALE, CAR_SCALE);
+  carInstance.rotation.set(
+    CAR_MODEL_ROTATION.x,
+    CAR_MODEL_ROTATION.y,
+    CAR_MODEL_ROTATION.z
+  );
+
+  carPivot.add(carInstance);
+  vanRoot.add(carPivot);
   scene.add(vanRoot);
 
   if (cityPoints.length) {
     const firstCityKey = cityPoints[0].key;
-    const firstPosition = cityPositions.get(firstCityKey).clone();
+    const firstPosition = cityPositions.get(firstCityKey).clone().add(VAN_OFFSET);
 
     vanRoot.position.copy(firstPosition);
     setActiveLabel(firstCityKey);
     showModal(firstCityKey);
     activeCity = firstCityKey;
   }
+
+  updateLabels();
 }
 
 function animate() {
@@ -360,7 +434,7 @@ function animate() {
     if (direction.lengthSq() > 0.000001) {
       direction.normalize();
 
-      const targetAngle = Math.atan2(direction.x, direction.z);
+      const targetAngle = Math.atan2(direction.x, direction.z) + Math.PI;
 
       let angleDiff = targetAngle - vanRoot.rotation.y;
       angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
@@ -374,7 +448,6 @@ function animate() {
     }
   }
 
-  controls.update();
   updateLabels();
   renderer.render(scene, camera);
 }
