@@ -2,50 +2,52 @@ import * as THREE from 'three';
 
 export function createRouteController({ scene, state }) {
   const routeRoadMaterial = new THREE.MeshStandardMaterial({
-    color: 0xc93d38,
-    roughness: 0.72,
-    metalness: 0.02,
-    envMapIntensity: 0.8,
+    color: 0x4f545a,
+    roughness: 0.97,
+    metalness: 0.01,
+    envMapIntensity: 0.1,
+    transparent: true,
+    opacity: 0.98,
     side: THREE.DoubleSide,
   });
 
   const routeRoadShadowMaterial = new THREE.MeshStandardMaterial({
-    color: 0x7f2725,
-    roughness: 1.0,
+    color: 0x2f3337,
+    roughness: 1,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.16,
+    side: THREE.DoubleSide,
+  });
+
+  const routeStripeMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFFFFFF,
+    roughness: 1,
     metalness: 0,
     transparent: true,
     opacity: 0.22,
     side: THREE.DoubleSide,
   });
 
-  const routeStripeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf06b61,
-    roughness: 0.8,
-    metalness: 0,
-    transparent: true,
-    opacity: 0.95,
-    side: THREE.DoubleSide,
-  });
-
   const startPadMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffc53d,
-    roughness: 0.45,
-    metalness: 0.02,
-    envMapIntensity: 1.0,
+    color: 0x6f757c,
+    roughness: 0.96,
+    metalness: 0,
+    envMapIntensity: 0.12,
   });
 
   const endPadMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff8a80,
-    roughness: 0.45,
-    metalness: 0.02,
-    envMapIntensity: 1.0,
+    color: 0x6f757c,
+    roughness: 0.96,
+    metalness: 0,
+    envMapIntensity: 0.12,
   });
 
   const padGeometry = new THREE.CylinderGeometry(
-    state.ROUTE_PAD_RADIUS,
-    state.ROUTE_PAD_RADIUS,
-    state.ROUTE_PAD_HEIGHT,
-    32
+    state.ROUTE_PAD_RADIUS * 0.72,
+    state.ROUTE_PAD_RADIUS * 0.72,
+    state.ROUTE_PAD_HEIGHT * 0.7,
+    24
   );
 
   function clearRoute() {
@@ -90,7 +92,7 @@ export function createRouteController({ scene, state }) {
 
     const mid = a.clone().lerp(b, 0.5);
 
-    const bend = Math.min(distance * 0.12, 0.22);
+    const bend = Math.min(distance * 0.1, 0.18);
 
     const candidateA = mid.clone().add(normalA.clone().multiplyScalar(bend));
     const candidateB = mid.clone().add(normalB.clone().multiplyScalar(bend));
@@ -164,9 +166,9 @@ export function createRouteController({ scene, state }) {
 
     const shadowGeometry = createRibbonGeometry(
       curve,
-      state.ROUTE_SHADOW_WIDTH,
+      0.11,
       state.ROUTE_SEGMENTS,
-      -state.ROUTE_SHADOW_OFFSET
+      -0.004
     );
 
     state.routeRoadShadowMesh = new THREE.Mesh(shadowGeometry, routeRoadShadowMaterial);
@@ -176,21 +178,21 @@ export function createRouteController({ scene, state }) {
 
     const roadGeometry = createRibbonGeometry(
       curve,
-      state.ROUTE_WIDTH,
+      0.082,
       state.ROUTE_SEGMENTS,
       0
     );
 
     state.routeRoadMesh = new THREE.Mesh(roadGeometry, routeRoadMaterial);
     state.routeRoadMesh.receiveShadow = true;
-    state.routeRoadMesh.castShadow = true;
+    state.routeRoadMesh.castShadow = false;
     state.routeGroup.add(state.routeRoadMesh);
 
     const stripeGeometry = createRibbonGeometry(
       curve,
-      state.ROUTE_STRIPE_WIDTH,
+      0.022,
       state.ROUTE_SEGMENTS,
-      state.ROUTE_STRIPE_OFFSET
+      0.002
     );
 
     state.routeStripeMesh = new THREE.Mesh(stripeGeometry, routeStripeMaterial);
@@ -204,20 +206,20 @@ export function createRouteController({ scene, state }) {
     state.startPad = new THREE.Mesh(padGeometry, startPadMaterial);
     state.startPad.position.set(
       startPoint.x,
-      routeY + state.ROUTE_PAD_HEIGHT * 0.5,
+      routeY + state.ROUTE_PAD_HEIGHT * 0.22,
       startPoint.z
     );
-    state.startPad.castShadow = true;
+    state.startPad.castShadow = false;
     state.startPad.receiveShadow = true;
     state.routeGroup.add(state.startPad);
 
     state.endPad = new THREE.Mesh(padGeometry, endPadMaterial);
     state.endPad.position.set(
       endPoint.x,
-      routeY + state.ROUTE_PAD_HEIGHT * 0.5,
+      routeY + state.ROUTE_PAD_HEIGHT * 0.22,
       endPoint.z
     );
-    state.endPad.castShadow = true;
+    state.endPad.castShadow = false;
     state.endPad.receiveShadow = true;
     state.routeGroup.add(state.endPad);
 

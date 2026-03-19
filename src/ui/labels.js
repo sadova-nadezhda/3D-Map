@@ -5,6 +5,7 @@ export function createLabelsController({
   camera,
   onSelectCity,
   isCityAvailable,
+  isInteractionLocked,
 }) {
   function createLabel(cityKey, title) {
     const button = document.createElement('button');
@@ -13,6 +14,7 @@ export function createLabelsController({
 
     button.addEventListener('click', () => {
       if (!isCityAvailable(cityKey)) return;
+      if (isInteractionLocked()) return;
       onSelectCity(cityKey);
     });
 
@@ -31,6 +33,16 @@ export function createLabelsController({
       const available = isCityAvailable(key);
       element.classList.toggle('disabled', !available);
       element.disabled = !available;
+    });
+
+    const locked = isInteractionLocked();
+
+    cityLabels.forEach((element, key) => {
+      const available = isCityAvailable(key);
+      const disabled = !available || locked;
+
+      element.classList.toggle('disabled', disabled);
+      element.disabled = disabled;
     });
   }
 

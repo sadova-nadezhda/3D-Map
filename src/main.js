@@ -41,6 +41,7 @@ const labels = createLabelsController({
   camera: sceneContext.camera,
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
+  isInteractionLocked: () => state.isMoving,
 });
 
 const route = createRouteController({
@@ -58,6 +59,7 @@ const van = createVanController({
 });
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
+  if (state.isMoving) return;
   if (!CITY_CONTENT[cityKey]) return;
   if (!state.availableCities.has(cityKey)) return;
 
@@ -94,6 +96,8 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 };
 
 function onPointerDown(event) {
+  if (state.isMoving) return;
+
   const rect = sceneContext.renderer.domElement.getBoundingClientRect();
 
   state.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
