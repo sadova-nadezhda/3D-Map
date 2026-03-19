@@ -9,6 +9,7 @@ export async function loadScene({
   modal,
   van,
   cityContent,
+  routeOrder,
 }) {
   const { scene, renderer, loader, HDR_PATH } = sceneContext;
 
@@ -21,6 +22,7 @@ export async function loadScene({
   ]);
 
   const mapScene = mapGltf.scene;
+  mapScene.scale.set(1.4, 1.4, 1.4);
   scene.add(mapScene);
   mapScene.updateWorldMatrix(true, true);
 
@@ -117,13 +119,23 @@ export async function loadScene({
 
   van.setupVan(carModel);
 
-  if (state.cityPoints.length) {
-    const firstCityKey = state.cityPoints[0].key;
+  const firstCityKey = routeOrder[0];
+
+  if (firstCityKey && state.cityPositions.has(firstCityKey)) {
     const firstPosition = state.cityPositions.get(firstCityKey).clone();
+
+    state.availableCities.add(firstCityKey);
+    state.completedCities.add(firstCityKey);
+
+    const nextCity = routeOrder[1];
+    if (nextCity) {
+      state.availableCities.add(nextCity);
+    }
 
     state.activeRouteY = firstPosition.y + state.ROUTE_Y_OFFSET;
     van.setVanPositionFromPoint(firstPosition);
     labels.setActiveLabel(firstCityKey);
+    labels.updateAvailability();
     modal.hide();
     state.activeCity = firstCityKey;
   }

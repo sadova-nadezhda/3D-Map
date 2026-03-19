@@ -6,6 +6,7 @@ export function createVanController({
   route,
   modal,
   labels,
+  routeOrder,
 }) {
   function centerCarModel(model) {
     const box = new THREE.Box3().setFromObject(model);
@@ -56,17 +57,26 @@ export function createVanController({
     route.buildRoute(state.activeCurve, state.activeRouteY);
 
     state.routeProgress = 0;
+    state.routeDistance = 0;
+    state.routeLength = state.activeCurve.getLength();
     state.isMoving = true;
   }
 
   function updateVanMovement(delta) {
     if (!state.vanRoot || !state.activeCurve || !state.isMoving) return;
 
-    state.routeProgress += delta * state.MOVE_SPEED;
+    state.routeDistance += delta * state.MOVE_SPEED;
 
-    if (state.routeProgress >= 1) {
+    if (state.routeLength <= 0.0001) {
       state.routeProgress = 1;
       state.isMoving = false;
+    } else {
+      state.routeProgress = state.routeDistance / state.routeLength;
+
+      if (state.routeProgress >= 1) {
+        state.routeProgress = 1;
+        state.isMoving = false;
+      }
     }
 
     const position = state.activeCurve.getPointAt(state.routeProgress);
@@ -97,7 +107,19 @@ export function createVanController({
       setVanPositionFromPoint(finalPoint);
 
       if (state.pendingModalCity) {
-        modal.show(state.pendingModalCity);
+        const arrivedCity = state.pendingModalCity;
+
+        state.completedCities.add(arrivedCity);
+
+        const currentIndex = routeOrder.indexOf(arrivedCity);
+        const nextCity = routeOrder[currentIndex + 1];
+
+        if (nextCity) {
+          state.availableCities.add(nextCity);
+        }
+
+        labels.updateAvailability();
+        modal.show(arrivedCity);
         state.pendingModalCity = null;
       }
     }

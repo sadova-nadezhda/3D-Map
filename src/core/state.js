@@ -9,6 +9,8 @@ export function createAppState() {
 
     activeCity: null,
     pendingModalCity: null,
+    availableCities: new Set(),
+    completedCities: new Set(),
 
     vanRoot: null,
     carPivot: null,
@@ -17,6 +19,8 @@ export function createAppState() {
     activeCurve: null,
     activeRouteY: 0,
     routeProgress: 0,
+    routeLength: 0,
+    routeDistance: 0,
     isMoving: false,
 
     routeGroup: null,
@@ -37,7 +41,7 @@ export function createAppState() {
     pointer: new THREE.Vector2(),
     clock: new THREE.Clock(),
 
-    MOVE_SPEED: 0.5,
+    MOVE_SPEED: 0.8,
     CAR_SCALE: 0.15,
     TURN_SPEED: 4.5,
     VAN_OFFSET: new THREE.Vector3(0, 0, 0),

@@ -1,7 +1,7 @@
 import './style.css';
 import * as THREE from 'three';
 
-import { CITY_CONTENT } from './config/cities.js';
+import { CITY_CONTENT, ROUTE_ORDER } from './config/cities.js';
 import { createAppState } from './core/state.js';
 import { createSceneContext } from './core/scene.js';
 import { createModalController } from './ui/modal.js';
@@ -30,12 +30,17 @@ const modal = createModalController({
 
 let selectCity = () => {};
 
+function isCityAvailable(cityKey) {
+  return state.availableCities.has(cityKey);
+}
+
 const labels = createLabelsController({
   labelsRoot,
   cityLabels: state.cityLabels,
   cityPoints: state.cityPoints,
   camera: sceneContext.camera,
   onSelectCity: (cityKey) => selectCity(cityKey),
+  isCityAvailable,
 });
 
 const route = createRouteController({
@@ -49,10 +54,12 @@ const van = createVanController({
   route,
   modal,
   labels,
+  routeOrder: ROUTE_ORDER,
 });
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (!CITY_CONTENT[cityKey]) return;
+  if (!state.availableCities.has(cityKey)) return;
 
   const sameCity = state.activeCity === cityKey;
   const nextPoint = state.cityPositions.get(cityKey);
@@ -95,10 +102,12 @@ function onPointerDown(event) {
   state.raycaster.setFromCamera(state.pointer, sceneContext.camera);
   const intersects = state.raycaster.intersectObjects(state.clickableMeshes, false);
 
-  if (intersects.length) {
-    const cityKey = intersects[0].object.userData.cityKey;
-    selectCity(cityKey);
-  }
+  if (!intersects.length) return;
+
+  const cityKey = intersects[0].object.userData.cityKey;
+  if (!state.availableCities.has(cityKey)) return;
+
+  selectCity(cityKey);
 }
 
 function onResize() {
@@ -133,6 +142,7 @@ loadScene({
   modal,
   van,
   cityContent: CITY_CONTENT,
+  routeOrder: ROUTE_ORDER,
 })
   .then(() => {
     animate();

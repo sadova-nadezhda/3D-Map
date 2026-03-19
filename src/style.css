@@ -31,6 +31,12 @@ canvas {
   display: block;
 }
 
+.city-label.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: default;
+}
+
 .modal-overlay {
   position: absolute;
   inset: 0;

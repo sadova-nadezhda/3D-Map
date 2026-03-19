@@ -4,12 +4,18 @@ export function createLabelsController({
   cityPoints,
   camera,
   onSelectCity,
+  isCityAvailable,
 }) {
   function createLabel(cityKey, title) {
     const button = document.createElement('button');
     button.className = 'city-label';
     button.textContent = title;
-    button.addEventListener('click', () => onSelectCity(cityKey));
+
+    button.addEventListener('click', () => {
+      if (!isCityAvailable(cityKey)) return;
+      onSelectCity(cityKey);
+    });
+
     labelsRoot.appendChild(button);
     cityLabels.set(cityKey, button);
   }
@@ -17,6 +23,14 @@ export function createLabelsController({
   function setActiveLabel(cityKey) {
     cityLabels.forEach((element, key) => {
       element.classList.toggle('active', key === cityKey);
+    });
+  }
+
+  function updateAvailability() {
+    cityLabels.forEach((element, key) => {
+      const available = isCityAvailable(key);
+      element.classList.toggle('disabled', !available);
+      element.disabled = !available;
     });
   }
 
@@ -44,11 +58,14 @@ export function createLabelsController({
       label.style.left = `${x}px`;
       label.style.top = `${y}px`;
     });
+
+    updateAvailability();
   }
 
   return {
     createLabel,
     setActiveLabel,
     updateLabels,
+    updateAvailability,
   };
 }

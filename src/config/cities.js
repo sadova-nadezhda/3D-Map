@@ -32,3 +32,14 @@ export const CITY_CONTENT = {
     description: 'Описание для Туркестана.',
   },
 };
+
+export const ROUTE_ORDER = [
+  'city_almaty',
+  'city_karaganda',
+  'city_astana',
+  'city_aqtobe',
+  'city_atyrau',
+  'city_aqtay',
+  'city_turk',
+  'city_shym',
+];
