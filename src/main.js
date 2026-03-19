@@ -1,8 +1,11 @@
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
+/**
+ * Контент модального окна.
+ */
 const CITY_CONTENT = {
   city_almaty: {
     title: 'Алматы',
@@ -45,53 +48,63 @@ const modalTitle = document.getElementById('modalTitle');
 const modalDescription = document.getElementById('modalDescription');
 const closeModalButton = document.getElementById('closeModal');
 
+/**
+ * Сцена.
+ */
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a0a);
+scene.background = new THREE.Color('#b86a57');
 
+/**
+ * Фиксированная камера.
+ */
 const camera = new THREE.PerspectiveCamera(
   40,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000,
+  1000
 );
+camera.position.set(3, 6, 4.5);
 
-// фиксированный ракурс как на референсе
-// camera.position.set(0, 7.2, 8.8);
-camera.position.set(0, 4, 4);
-;
+const CAMERA_TARGET = new THREE.Vector3(0, 0.55, 0);
+camera.lookAt(CAMERA_TARGET);
 
+/**
+ * Renderer.
+ */
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
-  alpha: true,
+  alpha: false,
 });
+
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+if ('outputColorSpace' in renderer) {
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+} else {
+  renderer.outputEncoding = THREE.sRGBEncoding;
+}
+
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 container.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = false;
-controls.enableRotate = false;
-controls.enablePan = false;
-controls.enableZoom = false;
-controls.target.set(0, 0.2, 0);
-controls.update();
-
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 2.2);
-directionalLight.position.set(5, 8, 5);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(2048, 2048);
-scene.add(directionalLight);
-
+/**
+ * Лоадеры.
+ */
 const loader = new GLTFLoader();
+const HDR_PATH = '/hdri/studio.hdr';
+
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const clock = new THREE.Clock();
 
+/**
+ * Данные сцены.
+ */
 const cityPoints = [];
 const clickableMeshes = [];
 const cityLabels = new Map();
@@ -99,28 +112,157 @@ const cityPositions = new Map();
 
 let activeCity = null;
 let vanRoot = null;
+let carPivot = null;
 let carInstance = null;
-let mapRoot = null;
 
 let activeCurve = null;
+let activeRouteY = 0;
 let routeProgress = 0;
 let isMoving = false;
-let routeLine = null;
 
-const ROUTE_HEIGHT = 0.03;
-const CURVE_HEIGHT = 0.18;
+/**
+ * Route meshes.
+ */
+let routeGroup = null;
+let routeRoadMesh = null;
+let routeRoadShadowMesh = null;
+let routeStripeMesh = null;
+let startPad = null;
+let endPad = null;
+
+/**
+ * Свет.
+ */
+let ambientLight = null;
+let keyLight = null;
+let fillLight = null;
+let backLight = null;
+
+/**
+ * Параметры движения.
+ */
 const MOVE_SPEED = 0.22;
-const CAR_Y_OFFSET = 0.1;
 const CAR_SCALE = 0.15;
 const TURN_SPEED = 4.5;
-const VAN_OFFSET = new THREE.Vector3(0.18, 0, 0);
+const VAN_OFFSET = new THREE.Vector3(0, 0, 0);
 const CAR_MODEL_ROTATION = {
   x: -Math.PI / 2,
-  y: Math.PI,
+  y: Math.PI / 2,
   z: Math.PI / 2,
 };
 
 let mapCenter = new THREE.Vector3();
+
+/**
+ * Параметры дороги.
+ */
+const ROUTE_Y_OFFSET = 0;
+const ROUTE_SHADOW_OFFSET = 0.006;
+const ROUTE_STRIPE_OFFSET = 0.003;
+const ROUTE_WIDTH = 0.16;
+const ROUTE_SHADOW_WIDTH = 0.19;
+const ROUTE_STRIPE_WIDTH = 0.045;
+const ROUTE_SEGMENTS = 100;
+const ROUTE_PAD_RADIUS = 0.07;
+const ROUTE_PAD_HEIGHT = 0.018;
+const VAN_RIDE_HEIGHT = 0;
+
+/**
+ * Материалы дороги.
+ */
+const routeRoadMaterial = new THREE.MeshStandardMaterial({
+  color: 0xc93d38,
+  roughness: 0.72,
+  metalness: 0.02,
+  envMapIntensity: 0.8,
+  side: THREE.DoubleSide,
+});
+
+const routeRoadShadowMaterial = new THREE.MeshStandardMaterial({
+  color: 0x7f2725,
+  roughness: 1.0,
+  metalness: 0,
+  transparent: true,
+  opacity: 0.22,
+  side: THREE.DoubleSide,
+});
+
+const routeStripeMaterial = new THREE.MeshStandardMaterial({
+  color: 0xf06b61,
+  roughness: 0.8,
+  metalness: 0,
+  transparent: true,
+  opacity: 0.95,
+  side: THREE.DoubleSide,
+});
+
+const startPadMaterial = new THREE.MeshStandardMaterial({
+  color: 0xffc53d,
+  roughness: 0.45,
+  metalness: 0.02,
+  envMapIntensity: 1.0,
+});
+
+const endPadMaterial = new THREE.MeshStandardMaterial({
+  color: 0xff8a80,
+  roughness: 0.45,
+  metalness: 0.02,
+  envMapIntensity: 1.0,
+});
+
+const padGeometry = new THREE.CylinderGeometry(
+  ROUTE_PAD_RADIUS,
+  ROUTE_PAD_RADIUS,
+  ROUTE_PAD_HEIGHT,
+  32
+);
+
+function createFallbackLights() {
+  ambientLight = new THREE.AmbientLight(0xffe6db, 0.75);
+  scene.add(ambientLight);
+
+  keyLight = new THREE.DirectionalLight(0xffffff, 1.55);
+  keyLight.position.set(-4.5, 8, 2.5);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.bias = -0.00015;
+  keyLight.shadow.normalBias = 0.02;
+  keyLight.shadow.camera.left = -12;
+  keyLight.shadow.camera.right = 12;
+  keyLight.shadow.camera.top = 12;
+  keyLight.shadow.camera.bottom = -12;
+  keyLight.shadow.camera.near = 0.1;
+  keyLight.shadow.camera.far = 40;
+  scene.add(keyLight);
+
+  fillLight = new THREE.DirectionalLight(0xffd9cf, 0.32);
+  fillLight.position.set(6, 4, -5);
+  scene.add(fillLight);
+
+  backLight = new THREE.DirectionalLight(0xffc1b2, 0.16);
+  backLight.position.set(0, 6, -8);
+  scene.add(backLight);
+}
+
+async function trySetupEnvironmentLighting() {
+  try {
+    const rgbeLoader = new RGBELoader();
+    const hdrTexture = await rgbeLoader.loadAsync(HDR_PATH);
+
+    hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = hdrTexture;
+
+    if (ambientLight) ambientLight.intensity = 0.42;
+    if (keyLight) keyLight.intensity = 0.95;
+    if (fillLight) fillLight.intensity = 0.18;
+    if (backLight) backLight.intensity = 0.08;
+
+    renderer.toneMappingExposure = 1.08;
+    console.log('HDRI успешно загружен:', HDR_PATH);
+  } catch (error) {
+    console.warn('HDRI не загрузился, используем обычный свет:', error);
+  }
+}
 
 function showModal(cityKey) {
   const city = CITY_CONTENT[cityKey];
@@ -178,13 +320,12 @@ function updateLabels() {
 
     const isVisible =
       projected.z < 1 &&
-      projected.x >= -1.2 &&
-      projected.x <= 1.2 &&
-      projected.y >= -1.2 &&
-      projected.y <= 1.2;
+      projected.x >= -1.1 &&
+      projected.x <= 1.1 &&
+      projected.y >= -1.1 &&
+      projected.y <= 1.1;
 
     label.style.display = isVisible ? 'block' : 'none';
-    if (!isVisible) return;
 
     const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
     const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
@@ -196,6 +337,7 @@ function updateLabels() {
 
 function onPointerDown(event) {
   const rect = renderer.domElement.getBoundingClientRect();
+
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
@@ -211,76 +353,216 @@ function onPointerDown(event) {
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  camera.lookAt(CAMERA_TARGET);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  updateLabels();
 }
 
-function clearRouteLine() {
-  if (!routeLine) return;
+function clearRoute() {
+  if (!routeGroup) return;
 
-  scene.remove(routeLine);
-  routeLine.geometry.dispose();
-  routeLine.material.dispose();
-  routeLine = null;
+  scene.remove(routeGroup);
+
+  routeGroup.traverse((child) => {
+    if (child.geometry && child.geometry !== padGeometry) {
+      child.geometry.dispose();
+    }
+  });
+
+  routeGroup = null;
+  routeRoadMesh = null;
+  routeRoadShadowMesh = null;
+  routeStripeMesh = null;
+  startPad = null;
+  endPad = null;
+}
+
+function createElegantRouteCurve(start, end, routeY) {
+  const a = start.clone();
+  const b = end.clone();
+
+  a.y = routeY;
+  b.y = routeY;
+
+  const flat = b.clone().sub(a);
+  flat.y = 0;
+
+  const distance = flat.length();
+
+  if (distance < 0.001) {
+    return new THREE.LineCurve3(a, b);
+  }
+
+  const dir = flat.clone().normalize();
+
+  const normalA = new THREE.Vector3(-dir.z, 0, dir.x);
+  const normalB = normalA.clone().multiplyScalar(-1);
+
+  const mid = a.clone().lerp(b, 0.5);
+
+  const bend = Math.min(distance * 0.12, 0.22);
+
+  const candidateA = mid.clone().add(normalA.clone().multiplyScalar(bend));
+  const candidateB = mid.clone().add(normalB.clone().multiplyScalar(bend));
+
+  const distA = candidateA.distanceToSquared(mapCenter);
+  const distB = candidateB.distanceToSquared(mapCenter);
+
+  const controlPoint = distA < distB ? candidateA : candidateB;
+  controlPoint.y = routeY;
+
+  return new THREE.QuadraticBezierCurve3(a, controlPoint, b);
+}
+
+/**
+ * Плоская лента вдоль кривой.
+ * Это лучше, чем ExtrudeGeometry, когда нужна дорога на поверхности карты.
+ */
+function createRibbonGeometry(curve, width, segments, yOffset = 0) {
+  const points = curve.getPoints(segments);
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i].clone();
+    p.y += yOffset;
+
+    let tangent;
+    if (i < points.length - 1) {
+      tangent = points[i + 1].clone().sub(points[i]);
+    } else {
+      tangent = points[i].clone().sub(points[i - 1]);
+    }
+
+    tangent.y = 0;
+    tangent.normalize();
+
+    const left = new THREE.Vector3(-tangent.z, 0, tangent.x).multiplyScalar(width * 0.5);
+    const right = left.clone().multiplyScalar(-1);
+
+    const lp = p.clone().add(left);
+    const rp = p.clone().add(right);
+
+    positions.push(lp.x, lp.y, lp.z);
+    positions.push(rp.x, rp.y, rp.z);
+
+    const v = i / (points.length - 1);
+    uvs.push(0, v);
+    uvs.push(1, v);
+  }
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = i * 2;
+    const b = i * 2 + 1;
+    const c = i * 2 + 2;
+    const d = i * 2 + 3;
+
+    indices.push(a, b, c);
+    indices.push(c, b, d);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+
+function buildRoute(curve, routeY) {
+  clearRoute();
+
+  routeGroup = new THREE.Group();
+
+  const shadowGeometry = createRibbonGeometry(
+    curve,
+    ROUTE_SHADOW_WIDTH,
+    ROUTE_SEGMENTS,
+    -ROUTE_SHADOW_OFFSET
+  );
+
+  routeRoadShadowMesh = new THREE.Mesh(shadowGeometry, routeRoadShadowMaterial);
+  routeRoadShadowMesh.receiveShadow = true;
+  routeRoadShadowMesh.castShadow = false;
+  routeGroup.add(routeRoadShadowMesh);
+
+  const roadGeometry = createRibbonGeometry(
+    curve,
+    ROUTE_WIDTH,
+    ROUTE_SEGMENTS,
+    0
+  );
+
+  routeRoadMesh = new THREE.Mesh(roadGeometry, routeRoadMaterial);
+  routeRoadMesh.receiveShadow = true;
+  routeRoadMesh.castShadow = true;
+  routeGroup.add(routeRoadMesh);
+
+  const stripeGeometry = createRibbonGeometry(
+    curve,
+    ROUTE_STRIPE_WIDTH,
+    ROUTE_SEGMENTS,
+    ROUTE_STRIPE_OFFSET
+  );
+
+  routeStripeMesh = new THREE.Mesh(stripeGeometry, routeStripeMaterial);
+  routeStripeMesh.receiveShadow = false;
+  routeStripeMesh.castShadow = false;
+  routeGroup.add(routeStripeMesh);
+
+  const startPoint = curve.getPointAt(0);
+  const endPoint = curve.getPointAt(1);
+
+  startPad = new THREE.Mesh(padGeometry, startPadMaterial);
+  startPad.position.set(
+    startPoint.x,
+    routeY + ROUTE_PAD_HEIGHT * 0.5,
+    startPoint.z
+  );
+  startPad.castShadow = true;
+  startPad.receiveShadow = true;
+  routeGroup.add(startPad);
+
+  endPad = new THREE.Mesh(padGeometry, endPadMaterial);
+  endPad.position.set(
+    endPoint.x,
+    routeY + ROUTE_PAD_HEIGHT * 0.5,
+    endPoint.z
+  );
+  endPad.castShadow = true;
+  endPad.receiveShadow = true;
+  routeGroup.add(endPad);
+
+  scene.add(routeGroup);
+}
+
+function centerCarModel(model) {
+  const box = new THREE.Box3().setFromObject(model);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+
+  model.position.x -= center.x;
+  model.position.z -= center.z;
+  model.position.y -= box.min.y;
+}
+
+function setVanPositionFromPoint(point) {
+  if (!vanRoot) return;
+
+  const finalPoint = point.clone().add(VAN_OFFSET);
+
+  vanRoot.position.set(
+    finalPoint.x,
+    activeRouteY + VAN_RIDE_HEIGHT,
+    finalPoint.z
+  );
 }
 
 function startRoute(start, end) {
-  const startPoint = start.clone();
-  const endPoint = end.clone();
-
-  // держим маршрут чуть выше поверхности карты
-  startPoint.y += ROUTE_HEIGHT;
-  endPoint.y += ROUTE_HEIGHT;
-
-  const direction = endPoint.clone().sub(startPoint);
-  direction.y = 0;
-
-  const distance = direction.length();
-
-  let controlPoint = startPoint.clone().lerp(endPoint, 0.5);
-
-  if (distance > 0.001) {
-    direction.normalize();
-
-    // два возможных перпендикуляра
-    const normalA = new THREE.Vector3(-direction.z, 0, direction.x);
-    const normalB = normalA.clone().multiplyScalar(-1);
-
-    // уменьшаем изгиб, чтобы не уводило за края
-    const curveOffset = Math.min(distance * 0.12, 0.22);
-
-    const candidateA = controlPoint.clone().add(normalA.clone().multiplyScalar(curveOffset));
-    const candidateB = controlPoint.clone().add(normalB.clone().multiplyScalar(curveOffset));
-
-    // выбираем вариант, который ближе к центру карты
-    const distA = candidateA.distanceToSquared(mapCenter);
-    const distB = candidateB.distanceToSquared(mapCenter);
-
-    controlPoint.copy(distA < distB ? candidateA : candidateB);
-  }
-
-  // без подъема вверх
-  controlPoint.y = startPoint.y;
-
-  activeCurve = new THREE.QuadraticBezierCurve3(
-    startPoint,
-    controlPoint,
-    endPoint
-  );
-
-  const points = activeCurve.getPoints(80);
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineDashedMaterial({
-    color: 0xff5533,
-    dashSize: 0.12,
-    gapSize: 0.08,
-  });
-
-  clearRouteLine();
-
-  routeLine = new THREE.Line(geometry, material);
-  routeLine.computeLineDistances();
-  scene.add(routeLine);
+  activeRouteY = Math.max(start.y, end.y) + ROUTE_Y_OFFSET;
+  activeCurve = createElegantRouteCurve(start, end, activeRouteY);
+  buildRoute(activeCurve, activeRouteY);
 
   routeProgress = 0;
   isMoving = true;
@@ -295,13 +577,13 @@ function selectCity(cityKey, skipRoute = false) {
   setActiveLabel(cityKey);
   showModal(cityKey);
 
-  const point = cityPositions.get(cityKey);
-  if (!point || !vanRoot) return;
-
-  const nextPoint = point.clone().add(VAN_OFFSET);
+  const nextPoint = cityPositions.get(cityKey);
+  if (!nextPoint || !vanRoot) return;
 
   if (skipRoute) {
-    vanRoot.position.copy(nextPoint);
+    activeRouteY = nextPoint.y + ROUTE_Y_OFFSET;
+    setVanPositionFromPoint(nextPoint);
+    clearRoute();
     return;
   }
 
@@ -314,75 +596,106 @@ function selectCity(cityKey, skipRoute = false) {
 }
 
 async function loadScene() {
+  createFallbackLights();
+  await trySetupEnvironmentLighting();
+
   const [mapGltf, carGltf] = await Promise.all([
-    loader.loadAsync('/models/kz_map-main.glb'),
-    loader.loadAsync('/models/car_main.glb'),
+    loader.loadAsync('/models/map.glb'),
+    loader.loadAsync('/models/car.glb'),
   ]);
 
-  mapRoot = new THREE.Group();
   const mapScene = mapGltf.scene;
-  mapRoot.add(mapScene);
-  scene.add(mapRoot);
+  scene.add(mapScene);
+  mapScene.updateWorldMatrix(true, true);
 
-  // ВАЖНО:
-  // подгоняем карту под нужный ракурс как на втором фото
-  mapRoot.rotation.x = 0;
-  mapRoot.rotation.y = -0.55;
-  mapRoot.rotation.z = 0;
+  mapScene.traverse((child) => {
+    if (!child.isMesh) return;
 
-  mapRoot.position.set(0, 0, 0);
-  mapRoot.scale.set(1, 1, 1);
+    const name = child.name.toLowerCase();
+    const originalColor = child.material?.color
+      ? child.material.color.clone()
+      : new THREE.Color('#d8c3a5');
 
-  mapRoot.updateWorldMatrix(true, true);
-
-  const box = new THREE.Box3().setFromObject(mapRoot);
-  const center = box.getCenter(new THREE.Vector3());
-
-  mapCenter.copy(center);
-
-  controls.target.copy(center);
-  camera.lookAt(center);
-  controls.update();
-
-  mapRoot.traverse((obj) => {
-    if (obj.isMesh) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
+    if (child.geometry) {
+      child.geometry.computeVertexNormals();
     }
 
-    if ((obj.name || '').startsWith('city_') && CITY_CONTENT[obj.name]) {
-      const worldPosition = new THREE.Vector3();
-      obj.getWorldPosition(worldPosition);
-
-      cityPoints.push({
-        key: obj.name,
-        position: worldPosition.clone(),
+    if (name.includes('plane')) {
+      child.material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#5c4c48'),
+        roughness: 0.95,
+        metalness: 0,
+        side: THREE.DoubleSide,
       });
 
-      cityPositions.set(obj.name, worldPosition.clone());
-      createInvisibleMarker(obj.name, worldPosition.clone());
-      createLabel(obj.name, CITY_CONTENT[obj.name].title);
+      child.castShadow = false;
+      child.receiveShadow = true;
+      return;
+    }
+
+    child.material = new THREE.MeshStandardMaterial({
+      color: originalColor,
+      roughness: 0.9,
+      metalness: 0,
+      envMapIntensity: 1.15,
+      dithering: true,
+    });
+
+    child.castShadow = true;
+    child.receiveShadow = true;
+  });
+
+  mapScene.traverse((child) => {
+    const name = child.name?.toLowerCase?.() ?? '';
+    if (!name.startsWith('city_')) return;
+
+    const key = name;
+    const position = new THREE.Vector3();
+    child.getWorldPosition(position);
+
+    cityPositions.set(key, position);
+    cityPoints.push({ key, position });
+
+    const cityContent = CITY_CONTENT[key];
+    if (cityContent) {
+      createLabel(key, cityContent.title);
+      createInvisibleMarker(key, position);
     }
   });
 
-  const carModel = carGltf.scene.getObjectByName('white_mesh');
+  const carModel =
+    carGltf.scene.getObjectByName('white_mesh') ||
+    carGltf.scene.children[0];
 
   if (!carModel) {
-    console.error('Объект white_mesh не найден в car.glb');
+    console.error('Модель машины не найдена в car.glb');
     return;
   }
 
   carModel.traverse((obj) => {
-    if (obj.isMesh) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
+    if (!obj.isMesh) return;
+
+    obj.castShadow = true;
+    obj.receiveShadow = true;
+
+    if (obj.geometry) {
+      obj.geometry.computeVertexNormals();
+    }
+
+    if (!obj.material || !obj.material.isMeshStandardMaterial) {
+      obj.material = new THREE.MeshStandardMaterial({
+        color: 0xff3b30,
+        roughness: 0.38,
+        metalness: 0.12,
+        envMapIntensity: 1.35,
+      });
     }
   });
 
   vanRoot = new THREE.Group();
-
+  
   const carPivot = new THREE.Group();
-  carPivot.position.set(0.1, -0.5, 0);
+  carPivot.position.set(0, 0, 0);
 
   carInstance = carModel.clone();
   carInstance.scale.set(CAR_SCALE, CAR_SCALE, CAR_SCALE);
@@ -392,21 +705,27 @@ async function loadScene() {
     CAR_MODEL_ROTATION.z
   );
 
+  centerCarModel(carInstance);
+
+  /**
+   * Если модель смотрит не туда:
+   * попробуй carPivot.rotation.y = Math.PI;
+   */
+
   carPivot.add(carInstance);
   vanRoot.add(carPivot);
   scene.add(vanRoot);
 
   if (cityPoints.length) {
     const firstCityKey = cityPoints[0].key;
-    const firstPosition = cityPositions.get(firstCityKey).clone().add(VAN_OFFSET);
+    const firstPosition = cityPositions.get(firstCityKey).clone();
 
-    vanRoot.position.copy(firstPosition);
+    activeRouteY = firstPosition.y + ROUTE_Y_OFFSET;
+    setVanPositionFromPoint(firstPosition);
     setActiveLabel(firstCityKey);
     showModal(firstCityKey);
     activeCity = firstCityKey;
   }
-
-  updateLabels();
 }
 
 function animate() {
@@ -423,12 +742,12 @@ function animate() {
     }
 
     const position = activeCurve.getPointAt(routeProgress);
-    vanRoot.position.copy(position);
+    setVanPositionFromPoint(position);
 
     const lookAheadT = Math.min(routeProgress + 0.03, 1);
     const lookAtPoint = activeCurve.getPointAt(lookAheadT);
 
-    const direction = lookAtPoint.clone().sub(vanRoot.position);
+    const direction = lookAtPoint.clone().sub(position);
     direction.y = 0;
 
     if (direction.lengthSq() > 0.000001) {
@@ -442,12 +761,16 @@ function animate() {
       vanRoot.rotation.y += angleDiff * Math.min(1, TURN_SPEED * delta);
     }
 
+    vanRoot.rotation.x = 0;
+    vanRoot.rotation.z = 0;
+
     if (!isMoving) {
       const finalPoint = activeCurve.getPointAt(1);
-      vanRoot.position.copy(finalPoint);
+      setVanPositionFromPoint(finalPoint);
     }
   }
 
+  camera.lookAt(CAMERA_TARGET);
   updateLabels();
   renderer.render(scene, camera);
 }
