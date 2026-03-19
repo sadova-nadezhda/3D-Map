@@ -1,35 +1,91 @@
 export const CITY_CONTENT = {
   city_almaty: {
-    title: 'Алматы',
-    description: 'Описание для Алматы.',
+    title: 'Чайхана “Плов”',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по локации. Здесь 1–2 строки.',
+    description:
+      'Полное описание локации. Здесь уже подробный текст: особенности места, атмосфера, что внутри, для чего эта точка нужна и любые другие детали.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
-  city_astana: {
-    title: 'Астана',
-    description: 'Описание для Астаны.',
-  },
+
   city_karaganda: {
     title: 'Караганда',
-    description: 'Описание для Караганды.',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Караганде.',
+    description: 'Полное описание по Караганде.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
+
+  city_astana: {
+    title: 'Астана',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Астане.',
+    description: 'Полное описание по Астане.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
+  },
+
   city_aqtobe: {
     title: 'Актобе',
-    description: 'Описание для Актобе.',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Актобе.',
+    description: 'Полное описание по Актобе.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
+
   city_atyrau: {
     title: 'Атырау',
-    description: 'Описание для Атырау.',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Атырау.',
+    description: 'Полное описание по Атырау.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
+
   city_aqtay: {
     title: 'Актау',
-    description: 'Описание для Актау.',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Актау.',
+    description: 'Полное описание по Актау.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
-  city_shym: {
-    title: 'Шымкент',
-    description: 'Описание для Шымкента.',
-  },
+
   city_turk: {
     title: 'Туркестан',
-    description: 'Описание для Туркестана.',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Туркестану.',
+    description: 'Полное описание по Туркестану.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
+  },
+
+  city_shym: {
+    title: 'Шымкент',
+    shortText: 'Короткий текст для карточки.',
+    previewText: 'Короткое превью по Шымкенту.',
+    description: 'Полное описание по Шымкенту.',
+    image: '/images/almaty.png',
+    buttonText: 'Подробнее',
+    hintTitle: 'Откройте карточку',
+    hintText: 'Нажмите на активный город, чтобы посмотреть информацию.',
   },
 };
 

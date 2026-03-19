@@ -22,7 +22,6 @@ export async function loadScene({
   ]);
 
   const mapScene = mapGltf.scene;
-  mapScene.scale.set(1.4, 1.4, 1.4);
   scene.add(mapScene);
   mapScene.updateWorldMatrix(true, true);
 
@@ -136,7 +135,8 @@ export async function loadScene({
     van.setVanPositionFromPoint(firstPosition);
     labels.setActiveLabel(firstCityKey);
     labels.updateAvailability();
-    modal.hide();
+    modal.hideAll();
+    modal.showHint(firstCityKey);
     state.activeCity = firstCityKey;
   }
 }

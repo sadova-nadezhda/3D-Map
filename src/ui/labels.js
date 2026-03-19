@@ -29,12 +29,6 @@ export function createLabelsController({
   }
 
   function updateAvailability() {
-    cityLabels.forEach((element, key) => {
-      const available = isCityAvailable(key);
-      element.classList.toggle('disabled', !available);
-      element.disabled = !available;
-    });
-
     const locked = isInteractionLocked();
 
     cityLabels.forEach((element, key) => {

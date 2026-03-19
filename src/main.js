@@ -12,27 +12,53 @@ import { loadScene } from './loaders/loadScene.js';
 
 const container = document.getElementById('scene-container');
 const labelsRoot = document.getElementById('labels-root');
+
+const hintCard = document.getElementById('hintCard');
+const hintTitle = document.getElementById('hintTitle');
+const hintText = document.getElementById('hintText');
+
+const previewCard = document.getElementById('previewCard');
+const previewTitle = document.getElementById('previewTitle');
+const previewText = document.getElementById('previewText');
+const previewImage = document.getElementById('previewImage');
+const previewMore = document.getElementById('previewMore');
+const previewClose = document.getElementById('previewClose');
+
 const modalOverlay = document.getElementById('modalOverlay');
 const modalTitle = document.getElementById('modalTitle');
 const modalDescription = document.getElementById('modalDescription');
+const modalImage = document.getElementById('modalImage');
 const closeModalButton = document.getElementById('closeModal');
 
 const sceneContext = createSceneContext({ container });
 const state = createAppState();
 
-const modal = createModalController({
-  modalOverlay,
-  modalTitle,
-  modalDescription,
-  closeModalButton,
-  cityContent: CITY_CONTENT,
-});
-
-let selectCity = () => {};
-
 function isCityAvailable(cityKey) {
   return state.availableCities.has(cityKey);
 }
+
+const modal = createModalController({
+  cityContent: CITY_CONTENT,
+
+  hintCard,
+  hintTitle,
+  hintText,
+
+  previewCard,
+  previewTitle,
+  previewText,
+  previewImage,
+  previewMore,
+  previewClose,
+
+  modalOverlay,
+  modalTitle,
+  modalDescription,
+  modalImage,
+  closeModalButton,
+});
+
+let selectCity = () => {};
 
 const labels = createLabelsController({
   labelsRoot,
@@ -68,10 +94,10 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 
   if (!nextPoint || !state.vanRoot) return;
 
-  if (sameCity && !state.isMoving) {
+  if (sameCity) {
     state.activeCity = cityKey;
     labels.setActiveLabel(cityKey);
-    modal.show(cityKey);
+    modal.showPreview(cityKey);
     return;
   }
 
@@ -82,11 +108,11 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
     state.activeRouteY = nextPoint.y + state.ROUTE_Y_OFFSET;
     van.setVanPositionFromPoint(nextPoint);
     route.clearRoute();
-    modal.hide();
+    modal.hideAll();
     return;
   }
 
-  modal.hide();
+  modal.hideAll();
   state.pendingModalCity = cityKey;
 
   const start = state.vanRoot.position.clone();
