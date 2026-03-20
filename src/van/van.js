@@ -6,6 +6,7 @@ export function createVanController({
   route,
   modal,
   labels,
+  cityTabs,
   routeOrder,
 }) {
   function centerCarModel(model) {
@@ -82,16 +83,7 @@ export function createVanController({
     const position = state.activeCurve.getPointAt(state.routeProgress);
     setVanPositionFromPoint(position);
 
-    const lookAheadDistance = Math.min(
-      state.routeDistance + 0.15,
-      state.routeLength
-    );
-
-    const lookAheadT =
-      state.routeLength > 0.0001
-        ? lookAheadDistance / state.routeLength
-        : 1;
-
+    const lookAheadT = Math.min(state.routeProgress + 0.03, 1);
     const lookAtPoint = state.activeCurve.getPointAt(lookAheadT);
 
     const direction = lookAtPoint.clone().sub(position);
@@ -128,6 +120,8 @@ export function createVanController({
         }
 
         labels.updateAvailability();
+        cityTabs.updateAvailability();
+        cityTabs.setActiveCity(arrivedCity);
         modal.showPreview(arrivedCity);
         state.pendingModalCity = null;
       }

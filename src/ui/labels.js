@@ -6,6 +6,7 @@ export function createLabelsController({
   onSelectCity,
   isCityAvailable,
   isInteractionLocked,
+  viewportElement,
 }) {
   function createLabel(cityKey, title) {
     const button = document.createElement('button');
@@ -41,6 +42,8 @@ export function createLabelsController({
   }
 
   function updateLabels() {
+    const rect = viewportElement.getBoundingClientRect();
+
     cityPoints.forEach((city) => {
       const label = cityLabels.get(city.key);
       if (!label) return;
@@ -58,8 +61,8 @@ export function createLabelsController({
 
       label.style.display = isVisible ? 'block' : 'none';
 
-      const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
-      const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+      const x = (projected.x * 0.5 + 0.5) * rect.width;
+      const y = (-projected.y * 0.5 + 0.5) * rect.height;
 
       label.style.left = `${x}px`;
       label.style.top = `${y}px`;

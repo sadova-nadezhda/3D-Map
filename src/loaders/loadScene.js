@@ -6,6 +6,7 @@ export async function loadScene({
   sceneContext,
   state,
   labels,
+  cityTabs,
   modal,
   van,
   cityContent,
@@ -22,6 +23,7 @@ export async function loadScene({
   ]);
 
   const mapScene = mapGltf.scene;
+  mapScene.scale.set(1.4, 1.4, 1.4);
   scene.add(mapScene);
   mapScene.updateWorldMatrix(true, true);
 
@@ -41,8 +43,8 @@ export async function loadScene({
 
     if (name.includes('plane')) {
       child.material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#5c4c48'),
-        roughness: 0.95,
+        color: new THREE.Color('#35241f'),
+        roughness: 0.01,
         metalness: 0,
         side: THREE.DoubleSide,
       });
@@ -135,8 +137,9 @@ export async function loadScene({
     van.setVanPositionFromPoint(firstPosition);
     labels.setActiveLabel(firstCityKey);
     labels.updateAvailability();
+    cityTabs.setActiveCity(firstCityKey);
+    cityTabs.updateAvailability();
     modal.hideAll();
-    modal.showHint(firstCityKey);
     state.activeCity = firstCityKey;
   }
 }

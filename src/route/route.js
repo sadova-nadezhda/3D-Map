@@ -2,30 +2,29 @@ import * as THREE from 'three';
 
 export function createRouteController({ scene, state }) {
   const routeRoadMaterial = new THREE.MeshStandardMaterial({
-    color: 0x4f545a,
-    roughness: 0.97,
-    metalness: 0.01,
-    envMapIntensity: 0.1,
+    color: 0x606060,
+    roughness: 1,
+    metalness: 0.2,
+    envMapIntensity: 1,
     transparent: true,
-    opacity: 0.98,
+    opacity: 1,
     side: THREE.DoubleSide,
   });
 
   const routeRoadShadowMaterial = new THREE.MeshStandardMaterial({
-    color: 0x2f3337,
+    color: 0x4f545a,
     roughness: 1,
     metalness: 0,
     transparent: true,
-    opacity: 0.16,
+    opacity: 0.32,
     side: THREE.DoubleSide,
   });
 
   const routeStripeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
-    roughness: 1,
+    color: 0xe6e6e6,
+    roughness: 0.9,
     metalness: 0,
-    transparent: true,
-    opacity: 0.22,
+    envMapIntensity: 0.6,
     side: THREE.DoubleSide,
   });
 
@@ -91,7 +90,6 @@ export function createRouteController({ scene, state }) {
     const normalB = normalA.clone().multiplyScalar(-1);
 
     const mid = a.clone().lerp(b, 0.5);
-
     const bend = Math.min(distance * 0.1, 0.18);
 
     const candidateA = mid.clone().add(normalA.clone().multiplyScalar(bend));
@@ -164,14 +162,19 @@ export function createRouteController({ scene, state }) {
 
     state.routeGroup = new THREE.Group();
 
+    const routeSegments = 220;
+
     const shadowGeometry = createRibbonGeometry(
       curve,
       0.11,
-      state.ROUTE_SEGMENTS,
+      routeSegments,
       -0.004
     );
 
-    state.routeRoadShadowMesh = new THREE.Mesh(shadowGeometry, routeRoadShadowMaterial);
+    state.routeRoadShadowMesh = new THREE.Mesh(
+      shadowGeometry,
+      routeRoadShadowMaterial
+    );
     state.routeRoadShadowMesh.receiveShadow = true;
     state.routeRoadShadowMesh.castShadow = false;
     state.routeGroup.add(state.routeRoadShadowMesh);
@@ -179,7 +182,7 @@ export function createRouteController({ scene, state }) {
     const roadGeometry = createRibbonGeometry(
       curve,
       0.082,
-      state.ROUTE_SEGMENTS,
+      routeSegments,
       0
     );
 
@@ -190,8 +193,8 @@ export function createRouteController({ scene, state }) {
 
     const stripeGeometry = createRibbonGeometry(
       curve,
-      0.022,
-      state.ROUTE_SEGMENTS,
+      0.024,
+      routeSegments,
       0.002
     );
 

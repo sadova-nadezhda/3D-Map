@@ -3,54 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive City Map</title>
+    <title>Street Хана</title>
   </head>
   <body>
     <div id="app">
-      <div id="scene-container"></div>
-      <div id="labels-root"></div>
+      <main class="experience-shell">
+        <section class="map-panel">
+          <div id="scene-container"></div>
+          <div class="map-surface"></div>
 
-      <div id="hintCard" class="hint-card" hidden>
-        <div class="hint-card__content">
-          <div class="hint-card__title" id="hintTitle"></div>
-          <div class="hint-card__text" id="hintText"></div>
-        </div>
-      </div>
+          <div id="labels-root" aria-hidden="true"></div>
 
-      <div id="previewCard" class="preview-card" hidden>
-        <button id="previewClose" class="preview-card__close" type="button" aria-label="Закрыть">
-          ×
-        </button>
-
-        <div class="preview-card__image-wrap">
-          <img id="previewImage" class="preview-card__image" src="" alt="" />
-        </div>
-
-        <div class="preview-card__body">
-          <h3 id="previewTitle" class="preview-card__title"></h3>
-          <p id="previewText" class="preview-card__text"></p>
-          <button id="previewMore" class="preview-card__button" type="button">
-            Подробнее
-          </button>
-        </div>
-      </div>
-
-      <div id="modalOverlay" class="modal-overlay" hidden>
-        <div class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-          <button id="closeModal" class="modal__close" type="button" aria-label="Закрыть">
-            ×
-          </button>
-
-          <div class="modal__media">
-            <img id="modalImage" class="modal__image" src="" alt="" />
+          <div id="mapHint" class="map-hint">
+            <button
+              id="closeHint"
+              class="map-hint__close"
+              type="button"
+              aria-label="Закрыть подсказку"
+            >
+              ×
+            </button>
+            <p class="map-hint__title">Откройте мир вкуса</p>
+            <p class="map-hint__text">
+              Следуйте по маршруту и нажимайте на города, чтобы открывать новые места и истории.
+            </p>
           </div>
 
-          <div class="modal__content">
-            <h2 id="modalTitle"></h2>
-            <p id="modalDescription"></p>
+          <div id="cityTabs" class="city-tabs" aria-label="Города маршрута"></div>
+
+          <article id="previewCard" class="preview-card" aria-hidden="true">
+            <button
+              id="closePreview"
+              class="preview-card__close"
+              type="button"
+              aria-label="Закрыть карточку"
+            >
+              ×
+            </button>
+            <div id="previewImage" class="preview-card__image">
+              <span id="previewTag" class="preview-card__tag"></span>
+            </div>
+            <div class="preview-card__content">
+              <h2 id="previewTitle" class="preview-card__title"></h2>
+              <p id="previewDescription" class="preview-card__text"></p>
+              <button id="previewButton" class="preview-card__button" type="button">
+                Подробнее
+              </button>
+            </div>
+          </article>
+
+          <div id="detailOverlay" class="detail-overlay" aria-hidden="true">
+            <article class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+              <div class="detail-modal__handle" aria-hidden="true"></div>
+
+              <button
+                id="closeModal"
+                class="detail-modal__close"
+                type="button"
+                aria-label="Закрыть карточку города"
+              >
+                ×
+              </button>
+
+              <aside class="detail-modal__sidebar">
+                <div id="modalImage" class="detail-modal__image">
+                  <div class="detail-modal__image-glow"></div>
+                  <div class="detail-modal__image-plate"></div>
+                  <span id="modalImageLabel" class="detail-modal__image-label"></span>
+                </div>
+
+                <section class="detail-modal__map-card">
+                  <div class="detail-modal__map-preview">
+                    <div class="detail-modal__map-marker"></div>
+                  </div>
+                  <a
+                    id="modalMapLink"
+                    class="detail-modal__map-button"
+                    href="#"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Открыть на Яндекс Карте
+                  </a>
+                </section>
+              </aside>
+
+              <div class="detail-modal__content">
+                <div class="detail-modal__tag-row">
+                  <span id="modalCityTag" class="detail-modal__city-tag"></span>
+                </div>
+
+                <h2 id="modalTitle" class="detail-modal__title">Город</h2>
+
+                <div class="detail-modal__meta">
+                  <span id="modalRating" class="detail-modal__meta-item"></span>
+                  <span id="modalHours" class="detail-modal__meta-item"></span>
+                </div>
+
+                <p id="modalDescription" class="detail-modal__lead"></p>
+
+                <section class="detail-modal__section">
+                  <p class="detail-modal__section-label">Популярный стритфуд города</p>
+                  <h3 id="modalDishTitle" class="detail-modal__section-title"></h3>
+                  <p id="modalDishDescription" class="detail-modal__section-text"></p>
+                </section>
+
+                <section class="detail-modal__section">
+                  <p class="detail-modal__section-label">О заведении</p>
+                  <p id="modalPlaceDescription" class="detail-modal__section-text"></p>
+                </section>
+              </div>
+            </article>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section class="feature-panel">
+          <video
+            class="feature-panel__video"
+            src="/media/street-hana-trailer.mp4"
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+          <div class="feature-panel__scrim"></div>
+
+          <div class="feature-panel__media">
+            <img
+              class="feature-panel__logo-image"
+              src="/media/street-hana-logo.png"
+              alt="Кинопоиск Street Хана"
+            />
+
+            <div class="feature-panel__bottom">
+              <p class="feature-panel__story">
+                Тениз мечтает стать шеф-поваром, но поражение в конкурсе меняет его планы. Добрая
+                комедия о дружбе и любви.
+              </p>
+
+              <div class="feature-panel__actions">
+                <a class="feature-panel__button feature-panel__button--primary" href="#">
+                  Смотреть на КиноПоиск
+                </a>
+                <button
+                  class="feature-panel__button feature-panel__button--icon"
+                  type="button"
+                  aria-label="Открыть трейлер"
+                >
+                  <img src="/media/btn-ico.svg" alt="" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <script type="module" src="/src/main.js"></script>

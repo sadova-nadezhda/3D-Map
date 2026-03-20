@@ -6,59 +6,74 @@ import { createAppState } from './core/state.js';
 import { createSceneContext } from './core/scene.js';
 import { createModalController } from './ui/modal.js';
 import { createLabelsController } from './ui/labels.js';
+import { createCityTabsController } from './ui/cityTabs.js';
 import { createRouteController } from './route/route.js';
 import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
 
 const container = document.getElementById('scene-container');
+const mapPanel = document.querySelector('.map-panel');
 const labelsRoot = document.getElementById('labels-root');
-
-const hintCard = document.getElementById('hintCard');
-const hintTitle = document.getElementById('hintTitle');
-const hintText = document.getElementById('hintText');
-
+const cityTabsRoot = document.getElementById('cityTabs');
 const previewCard = document.getElementById('previewCard');
-const previewTitle = document.getElementById('previewTitle');
-const previewText = document.getElementById('previewText');
 const previewImage = document.getElementById('previewImage');
-const previewMore = document.getElementById('previewMore');
-const previewClose = document.getElementById('previewClose');
-
-const modalOverlay = document.getElementById('modalOverlay');
+const previewTag = document.getElementById('previewTag');
+const previewTitle = document.getElementById('previewTitle');
+const previewDescription = document.getElementById('previewDescription');
+const previewButton = document.getElementById('previewButton');
+const closePreviewButton = document.getElementById('closePreview');
+const detailOverlay = document.getElementById('detailOverlay');
 const modalTitle = document.getElementById('modalTitle');
 const modalDescription = document.getElementById('modalDescription');
+const modalCityTag = document.getElementById('modalCityTag');
+const modalRating = document.getElementById('modalRating');
+const modalHours = document.getElementById('modalHours');
+const modalDishTitle = document.getElementById('modalDishTitle');
+const modalDishDescription = document.getElementById('modalDishDescription');
+const modalPlaceDescription = document.getElementById('modalPlaceDescription');
+const modalMapLink = document.getElementById('modalMapLink');
 const modalImage = document.getElementById('modalImage');
+const modalImageLabel = document.getElementById('modalImageLabel');
 const closeModalButton = document.getElementById('closeModal');
+const closeHintButton = document.getElementById('closeHint');
+const mapHint = document.getElementById('mapHint');
 
 const sceneContext = createSceneContext({ container });
 const state = createAppState();
+const mobileIsoOffset = new THREE.Vector3(-2.9, 4.6, 2.7);
+const cameraDesiredPosition = new THREE.Vector3();
+const cameraDesiredTarget = new THREE.Vector3();
+
+const modal = createModalController({
+  cityContent: CITY_CONTENT,
+  mapPanel,
+  previewCard,
+  previewImage,
+  previewTag,
+  previewTitle,
+  previewDescription,
+  previewButton,
+  closePreviewButton,
+  detailOverlay,
+  modalTitle,
+  modalDescription,
+  closeModalButton,
+  modalCityTag,
+  modalRating,
+  modalHours,
+  modalDishTitle,
+  modalDishDescription,
+  modalPlaceDescription,
+  modalMapLink,
+  modalImage,
+  modalImageLabel,
+});
+
+let selectCity = () => {};
 
 function isCityAvailable(cityKey) {
   return state.availableCities.has(cityKey);
 }
-
-const modal = createModalController({
-  cityContent: CITY_CONTENT,
-
-  hintCard,
-  hintTitle,
-  hintText,
-
-  previewCard,
-  previewTitle,
-  previewText,
-  previewImage,
-  previewMore,
-  previewClose,
-
-  modalOverlay,
-  modalTitle,
-  modalDescription,
-  modalImage,
-  closeModalButton,
-});
-
-let selectCity = () => {};
 
 const labels = createLabelsController({
   labelsRoot,
@@ -68,6 +83,15 @@ const labels = createLabelsController({
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
   isInteractionLocked: () => state.isMoving,
+  viewportElement: container,
+});
+
+const cityTabs = createCityTabsController({
+  root: cityTabsRoot,
+  routeOrder: ROUTE_ORDER,
+  cityContent: CITY_CONTENT,
+  onSelectCity: (cityKey) => selectCity(cityKey),
+  isCityAvailable,
 });
 
 const route = createRouteController({
@@ -81,8 +105,40 @@ const van = createVanController({
   route,
   modal,
   labels,
+  cityTabs,
   routeOrder: ROUTE_ORDER,
 });
+
+function updateCameraLayout() {
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    sceneContext.camera.fov = 34;
+    sceneContext.camera.position.set(0.9, 7.3, 5.8);
+    sceneContext.CAMERA_TARGET.set(0.15, 0.55, 0);
+  } else {
+    sceneContext.camera.fov = 40;
+    sceneContext.camera.position.set(3, 6, 4.5);
+    sceneContext.CAMERA_TARGET.set(0, 0.55, 0);
+  }
+}
+
+function updateMobileFollowCamera(delta) {
+  const isMobile = window.innerWidth <= 768;
+
+  if (!isMobile || !state.vanRoot) {
+    return;
+  }
+
+  cameraDesiredTarget.copy(state.vanRoot.position);
+  cameraDesiredTarget.y = state.vanRoot.position.y + 0.28;
+
+  cameraDesiredPosition.copy(state.vanRoot.position).add(mobileIsoOffset);
+
+  const followLerp = 1 - Math.exp(-delta * 4.5);
+  sceneContext.camera.position.lerp(cameraDesiredPosition, followLerp);
+  sceneContext.CAMERA_TARGET.lerp(cameraDesiredTarget, followLerp);
+}
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (state.isMoving) return;
@@ -94,15 +150,14 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 
   if (!nextPoint || !state.vanRoot) return;
 
-  if (sameCity) {
-    state.activeCity = cityKey;
-    labels.setActiveLabel(cityKey);
+  state.activeCity = cityKey;
+  labels.setActiveLabel(cityKey);
+  cityTabs.setActiveCity(cityKey);
+
+  if (sameCity && !state.isMoving) {
     modal.showPreview(cityKey);
     return;
   }
-
-  state.activeCity = cityKey;
-  labels.setActiveLabel(cityKey);
 
   if (skipRoute) {
     state.activeRouteY = nextPoint.y + state.ROUTE_Y_OFFSET;
@@ -119,7 +174,7 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   const end = nextPoint.clone();
 
   van.startRoute(start, end);
-};
+}
 
 function onPointerDown(event) {
   if (state.isMoving) return;
@@ -142,13 +197,18 @@ function onPointerDown(event) {
 
 function onResize() {
   const { camera, renderer, CAMERA_TARGET } = sceneContext;
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
 
-  camera.aspect = window.innerWidth / window.innerHeight;
+  updateCameraLayout();
+
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
   camera.lookAt(CAMERA_TARGET);
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  labels.updateLabels();
 }
 
 function animate() {
@@ -157,18 +217,29 @@ function animate() {
   const delta = state.clock.getDelta();
 
   van.updateVanMovement(delta);
+  updateMobileFollowCamera(delta);
   sceneContext.camera.lookAt(sceneContext.CAMERA_TARGET);
   labels.updateLabels();
   sceneContext.renderer.render(sceneContext.scene, sceneContext.camera);
 }
 
+closeHintButton.addEventListener('click', () => {
+  mapHint.classList.add('hidden');
+  mapPanel.classList.remove('map-panel--hint');
+});
+
 sceneContext.renderer.domElement.addEventListener('pointerdown', onPointerDown);
 window.addEventListener('resize', onResize);
+
+updateCameraLayout();
+onResize();
+mapPanel.classList.add('map-panel--hint');
 
 loadScene({
   sceneContext,
   state,
   labels,
+  cityTabs,
   modal,
   van,
   cityContent: CITY_CONTENT,
