@@ -4,8 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Street Хана</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #000;
+      }
+
+      body.booting {
+        overflow: hidden;
+      }
+
+      body.booting > * {
+        opacity: 0;
+      }
+    </style>
   </head>
-  <body>
+  <body class="booting">
+    <div id="preloader" class="preloader" aria-live="polite">
+      <div class="preloader__panel">
+        <div class="preloader__track" aria-hidden="true">
+          <div class="preloader__lane"></div>
+
+          <div id="preloaderVan" class="preloader__van">
+            <img class="preloader__van-image" src="/media/preloader-truck.png" alt="" />
+            <img class="preloader__wheel preloader__wheel--front" src="/media/preloader-wheel.png" alt="" />
+            <img class="preloader__wheel preloader__wheel--rear" src="/media/preloader-wheel.png" alt="" />
+            <div class="preloader__dust"></div>
+          </div>
+
+          <div class="preloader__progress">
+            <div class="preloader__progress-ring">
+              <span id="preloaderValue" class="preloader__progress-value">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="app">
       <main class="experience-shell">
         <section class="map-panel">

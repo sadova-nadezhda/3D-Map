@@ -1,4 +1,4 @@
-/* ------------------------
+﻿/* ------------------------
 Fonts
 --------------------------*/
 
@@ -197,6 +197,234 @@ a {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+body:not(.app-ready) {
+  overflow: hidden;
+}
+
+.preloader {
+  --preloader-progress: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #8b3c2f;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.preloader[hidden],
+.preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader::before {
+  content: "";
+  position: absolute;
+  inset: -4% -10%;
+  background: url("/media/preloader-bg.png") center center / cover no-repeat;
+  transform: translate3d(calc(var(--preloader-progress) * -16%), 0, 0) scale(1.18);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.preloader::after {
+  content: none;
+}
+
+.preloader__panel {
+  position: relative;
+  width: 100vw;
+}
+
+.preloader__panel {
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.preloader__track {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 520px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.preloader__lane {
+  display: none;
+}
+
+.preloader__van {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  width: clamp(420px, 38vw, 694px);
+  height: clamp(194px, 17.6vw, 322px);
+  transform: translate3d(-50%, 0, 0);
+  will-change: transform;
+  transition: none;
+}
+
+.preloader.is-launching .preloader__van {
+  transform: translate3d(calc(100vw + 180px), 0, 0) rotate(-1.2deg) scale(1.02);
+  transition: transform 1.8s cubic-bezier(0.18, 0.78, 0.16, 1);
+}
+
+.preloader__van-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  z-index: 2;
+  filter: drop-shadow(0 14px 18px rgba(69, 16, 18, 0.2));
+}
+
+.preloader__wheel {
+  position: absolute;
+  bottom: 4.2%;
+  width: 13.1%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  z-index: 3;
+  animation: preloader-wheel-spin 0.9s linear infinite;
+}
+
+.preloader.is-launching .preloader__wheel {
+  animation-duration: 0.26s;
+}
+
+.preloader__wheel--front {
+  right: 8.2%;
+}
+
+.preloader__wheel--rear {
+  left: 20.6%;
+}
+
+.preloader__dust {
+  position: absolute;
+  left: -3%;
+  bottom: 6.5%;
+  width: 25%;
+  height: 14%;
+  background: radial-gradient(circle, rgba(255, 182, 116, 0.28) 0%, rgba(255, 182, 116, 0) 72%);
+  filter: blur(3px);
+  z-index: 0;
+  animation: preloader-dust 1.6s ease-in-out infinite;
+}
+
+.preloader__progress {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.preloader__progress-ring {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from -90deg,
+      rgba(255, 255, 255, 0.95) calc(var(--preloader-progress) * 1turn),
+      rgba(255, 255, 255, 0.22) 0
+    );
+}
+
+.preloader__progress-ring::before {
+  content: "";
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(115, 28, 45, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.preloader__progress-value {
+  position: absolute;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.preloader.is-launching .preloader__dust {
+  animation-duration: 0.48s;
+  opacity: 1;
+  transform: scale(1.5);
+}
+
+@keyframes preloader-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes preloader-dust {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scaleX(0.9);
+  }
+
+  50% {
+    opacity: 0.52;
+    transform: scaleX(1.18);
+  }
+}
+
+@media (max-width: 768px) {
+  .preloader__panel {
+    width: calc(100vw - 24px);
+    padding: 12px 0;
+  }
+
+  .preloader__track {
+    height: min(calc((100vw - 24px) * 1.12), calc(100vh - 24px));
+    min-height: 360px;
+  }
+
+  .preloader__van {
+    left: 50%;
+    bottom: 17%;
+    width: 250px;
+    height: 116px;
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  .preloader__progress {
+    bottom: 5%;
+  }
+
+  .preloader__progress-ring {
+    width: 48px;
+    height: 48px;
+  }
+
+  .preloader__progress-ring::before {
+    width: 40px;
+    height: 40px;
+  }
+
+  .preloader__progress-value {
+    font-size: 12px;
+  }
 }
 
 #app {
@@ -1108,3 +1336,4 @@ a {
     height: 34px;
   }
 }
+

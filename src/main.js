@@ -13,6 +13,8 @@ import { createRouteController } from './route/route.js';
 import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
 
+document.body.classList.remove('booting');
+
 const container = document.getElementById('scene-container');
 const mapPanel = document.querySelector('.map-panel');
 const labelsRoot = document.getElementById('labels-root');
@@ -39,6 +41,8 @@ const modalImageLabel = document.getElementById('modalImageLabel');
 const closeModalButton = document.getElementById('closeModal');
 const closeHintButton = document.getElementById('closeHint');
 const mapHint = document.getElementById('mapHint');
+const preloader = document.getElementById('preloader');
+const preloaderValue = document.getElementById('preloaderValue');
 
 const sceneContext = createSceneContext({ container });
 const state = createAppState();
@@ -52,6 +56,89 @@ const lenis = new Lenis({
   anchors: true,
 });
 const almatyScreenPosition = new THREE.Vector3();
+let shouldStartAnimation = false;
+let hasAnimationStarted = false;
+let isSceneLoaded = false;
+let isPreloaderDismissed = false;
+let isPreloaderLaunching = false;
+let preloaderProgress = 0;
+let preloaderTarget = 0;
+let preloaderLastTime = 0;
+
+function startSceneAnimation() {
+  if (hasAnimationStarted || !shouldStartAnimation) {
+    return;
+  }
+
+  hasAnimationStarted = true;
+  requestAnimationFrame(animate);
+}
+
+function finishPreloader() {
+  if (isPreloaderDismissed) {
+    return;
+  }
+
+  isPreloaderDismissed = true;
+  document.body.classList.add('app-ready');
+  preloader.classList.add('is-hidden');
+  startSceneAnimation();
+
+  window.setTimeout(() => {
+    preloader.setAttribute('hidden', 'true');
+  }, 900);
+}
+
+function launchPreloaderVan() {
+  if (isPreloaderLaunching) {
+    return;
+  }
+
+  isPreloaderLaunching = true;
+  preloader.classList.add('is-launching');
+
+  window.setTimeout(() => {
+    finishPreloader();
+  }, 1350);
+}
+
+function updatePreloaderVisuals() {
+  preloaderValue.textContent = `${Math.round(preloaderProgress)}%`;
+  preloader.style.setProperty('--preloader-progress', String(preloaderProgress / 100));
+
+  if (isSceneLoaded && preloaderProgress >= 100) {
+    launchPreloaderVan();
+  }
+}
+
+function tickPreloader(time) {
+  if (isPreloaderDismissed) {
+    return;
+  }
+
+  if (!preloaderLastTime) {
+    preloaderLastTime = time;
+  }
+
+  const delta = time - preloaderLastTime;
+  preloaderLastTime = time;
+
+  if (!isSceneLoaded) {
+    const pace = preloaderProgress < 68 ? 0.032 : 0.013;
+    preloaderTarget = Math.min(92, preloaderTarget + delta * pace);
+  } else {
+    preloaderTarget = 100;
+  }
+
+  preloaderProgress += (preloaderTarget - preloaderProgress) * (isSceneLoaded ? 0.12 : 0.055);
+
+  if (isSceneLoaded && 100 - preloaderProgress < 0.18) {
+    preloaderProgress = 100;
+  }
+
+  updatePreloaderVisuals();
+  requestAnimationFrame(tickPreloader);
+}
 
 const modal = createModalController({
   cityContent: CITY_CONTENT,
@@ -295,6 +382,7 @@ window.addEventListener('resize', onResize);
 updateCameraLayout();
 onResize();
 mapPanel.classList.add('map-panel--hint');
+requestAnimationFrame(tickPreloader);
 
 loadScene({
   sceneContext,
@@ -307,8 +395,11 @@ loadScene({
   routeOrder: ROUTE_ORDER,
 })
   .then(() => {
-    animate();
+    isSceneLoaded = true;
+    shouldStartAnimation = true;
   })
   .catch((error) => {
+    isSceneLoaded = true;
+    shouldStartAnimation = true;
     console.error('Ошибка загрузки сцены:', error);
   });
