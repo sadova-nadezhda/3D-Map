@@ -1,5 +1,7 @@
 import './style.css';
+import 'lenis/dist/lenis.css';
 import * as THREE from 'three';
+import Lenis from 'lenis';
 
 import { CITY_CONTENT, ROUTE_ORDER } from './config/cities.js';
 import { createAppState } from './core/state.js';
@@ -43,6 +45,13 @@ const state = createAppState();
 const mobileIsoOffset = new THREE.Vector3(-2.9, 4.6, 2.7);
 const cameraDesiredPosition = new THREE.Vector3();
 const cameraDesiredTarget = new THREE.Vector3();
+const lenis = new Lenis({
+  smoothWheel: true,
+  lerp: 0.08,
+  touchMultiplier: 1.1,
+  anchors: true,
+});
+const almatyScreenPosition = new THREE.Vector3();
 
 const modal = createModalController({
   cityContent: CITY_CONTENT,
@@ -67,6 +76,18 @@ const modal = createModalController({
   modalMapLink,
   modalImage,
   modalImageLabel,
+  onPreviewShown: (cityKey) => {
+    const currentIndex = ROUTE_ORDER.indexOf(cityKey);
+    const nextCity = ROUTE_ORDER[currentIndex + 1];
+
+    if (!nextCity) {
+      return;
+    }
+
+    state.availableCities.add(nextCity);
+    labels.updateAvailability();
+    cityTabs.updateAvailability();
+  },
 });
 
 let selectCity = () => {};
@@ -140,10 +161,50 @@ function updateMobileFollowCamera(delta) {
   sceneContext.CAMERA_TARGET.lerp(cameraDesiredTarget, followLerp);
 }
 
+function hideMapHint() {
+  mapHint.classList.add('hidden');
+  mapPanel.classList.remove('map-panel--hint');
+}
+
+function updateMapHintPosition() {
+  if (mapHint.classList.contains('hidden')) {
+    return;
+  }
+
+  const almatyPoint = state.cityPositions.get('city_almaty');
+  if (!almatyPoint) {
+    return;
+  }
+
+  const containerRect = container.getBoundingClientRect();
+  const hintWidth = Math.min(338, containerRect.width - 32);
+  const hintHeight = mapHint.offsetHeight || 140;
+  const margin = 16;
+
+  almatyScreenPosition.copy(almatyPoint).project(sceneContext.camera);
+
+  const anchorX = ((almatyScreenPosition.x + 1) / 2) * containerRect.width;
+  const anchorY = ((1 - almatyScreenPosition.y) / 2) * containerRect.height;
+
+  const left = Math.min(
+    Math.max(anchorX, margin + hintWidth / 2),
+    containerRect.width - margin - hintWidth / 2
+  );
+  const top = Math.min(
+    Math.max(anchorY - hintHeight - 28, margin),
+    containerRect.height - hintHeight - margin
+  );
+
+  mapHint.style.left = `${left}px`;
+  mapHint.style.top = `${top}px`;
+}
+
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (state.isMoving) return;
   if (!CITY_CONTENT[cityKey]) return;
   if (!state.availableCities.has(cityKey)) return;
+
+  hideMapHint();
 
   const sameCity = state.activeCity === cityKey;
   const nextPoint = state.cityPositions.get(cityKey);
@@ -209,9 +270,11 @@ function onResize() {
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   labels.updateLabels();
+  updateMapHintPosition();
 }
 
-function animate() {
+function animate(time) {
+  lenis.raf(time);
   requestAnimationFrame(animate);
 
   const delta = state.clock.getDelta();
@@ -220,13 +283,11 @@ function animate() {
   updateMobileFollowCamera(delta);
   sceneContext.camera.lookAt(sceneContext.CAMERA_TARGET);
   labels.updateLabels();
+  updateMapHintPosition();
   sceneContext.renderer.render(sceneContext.scene, sceneContext.camera);
 }
 
-closeHintButton.addEventListener('click', () => {
-  mapHint.classList.add('hidden');
-  mapPanel.classList.remove('map-panel--hint');
-});
+closeHintButton.addEventListener('click', hideMapHint);
 
 sceneContext.renderer.domElement.addEventListener('pointerdown', onPointerDown);
 window.addEventListener('resize', onResize);

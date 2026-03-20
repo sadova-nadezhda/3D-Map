@@ -128,11 +128,6 @@ export async function loadScene({
     state.availableCities.add(firstCityKey);
     state.completedCities.add(firstCityKey);
 
-    const nextCity = routeOrder[1];
-    if (nextCity) {
-      state.availableCities.add(nextCity);
-    }
-
     state.activeRouteY = firstPosition.y + state.ROUTE_Y_OFFSET;
     van.setVanPositionFromPoint(firstPosition);
     labels.setActiveLabel(firstCityKey);

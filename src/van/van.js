@@ -112,13 +112,6 @@ export function createVanController({
 
         state.completedCities.add(arrivedCity);
 
-        const currentIndex = routeOrder.indexOf(arrivedCity);
-        const nextCity = routeOrder[currentIndex + 1];
-
-        if (nextCity) {
-          state.availableCities.add(nextCity);
-        }
-
         labels.updateAvailability();
         cityTabs.updateAvailability();
         cityTabs.setActiveCity(arrivedCity);

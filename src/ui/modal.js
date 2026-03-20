@@ -21,6 +21,7 @@ export function createModalController({
   modalMapLink,
   modalImage,
   modalImageLabel,
+  onPreviewShown = () => {},
 }) {
   let activeCityKey = null;
 
@@ -68,6 +69,7 @@ export function createModalController({
     detailOverlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
     syncPanelOverlay();
+    onPreviewShown(cityKey);
   }
 
   function showDetail(cityKey = activeCityKey) {
