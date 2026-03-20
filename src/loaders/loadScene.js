@@ -28,6 +28,7 @@ export async function loadScene({
   mapScene.updateWorldMatrix(true, true);
 
   state.mapCenter.copy(computeObjectCenter(mapScene));
+  state.mapBounds.setFromObject(mapScene);
 
   mapScene.traverse((child) => {
     if (!child.isMesh) return;

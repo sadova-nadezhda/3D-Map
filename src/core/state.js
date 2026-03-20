@@ -36,6 +36,7 @@ export function createAppState() {
     backLight: null,
 
     mapCenter: new THREE.Vector3(),
+    mapBounds: new THREE.Box3(),
 
     raycaster: new THREE.Raycaster(),
     pointer: new THREE.Vector2(),

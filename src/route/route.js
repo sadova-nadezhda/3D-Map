@@ -85,23 +85,125 @@ export function createRouteController({ scene, state }) {
     }
 
     const dir = flat.clone().normalize();
+    const normal = new THREE.Vector3(-dir.z, 0, dir.x);
+    const inwardSign = normal.dot(state.mapCenter.clone().sub(a)) >= 0 ? 1 : -1;
+    const bounds = state.mapBounds;
+    const hasBounds = Number.isFinite(bounds.min.x) && Number.isFinite(bounds.max.x);
+    const edgePadding = 0.34;
 
-    const normalA = new THREE.Vector3(-dir.z, 0, dir.x);
-    const normalB = normalA.clone().multiplyScalar(-1);
+    const clampPointToMap = (point) => {
+      if (!hasBounds) {
+        point.y = routeY;
+        return point;
+      }
 
-    const mid = a.clone().lerp(b, 0.5);
-    const bend = Math.min(distance * 0.1, 0.18);
+      point.x = THREE.MathUtils.clamp(point.x, bounds.min.x + edgePadding, bounds.max.x - edgePadding);
+      point.z = THREE.MathUtils.clamp(point.z, bounds.min.z + edgePadding, bounds.max.z - edgePadding);
 
-    const candidateA = mid.clone().add(normalA.clone().multiplyScalar(bend));
-    const candidateB = mid.clone().add(normalB.clone().multiplyScalar(bend));
+      const radiusX = Math.max((bounds.max.x - bounds.min.x) * 0.4, 0.001);
+      const radiusZ = Math.max((bounds.max.z - bounds.min.z) * 0.24, 0.001);
+      const dx = point.x - state.mapCenter.x;
+      const dz = point.z - state.mapCenter.z;
+      const ellipseDistance = (dx * dx) / (radiusX * radiusX) + (dz * dz) / (radiusZ * radiusZ);
 
-    const distA = candidateA.distanceToSquared(state.mapCenter);
-    const distB = candidateB.distanceToSquared(state.mapCenter);
+      if (ellipseDistance > 1) {
+        const scale = 1 / Math.sqrt(ellipseDistance);
+        point.x = state.mapCenter.x + dx * scale;
+        point.z = state.mapCenter.z + dz * scale;
+      }
 
-    const controlPoint = distA < distB ? candidateA : candidateB;
-    controlPoint.y = routeY;
+      point.y = routeY;
+      return point;
+    };
 
-    return new THREE.QuadraticBezierCurve3(a, controlPoint, b);
+    const distanceFactor = THREE.MathUtils.clamp((distance - 0.45) / 1.35, 0, 1);
+    const midpoint = a.clone().lerp(b, 0.5);
+    const halfWidth = hasBounds
+      ? Math.max(bounds.max.x - state.mapCenter.x - edgePadding, 0.001)
+      : 1;
+    const halfHeightSouth = hasBounds
+      ? Math.max(state.mapCenter.z - bounds.min.z - edgePadding, 0.001)
+      : 1;
+    const halfHeightNorth = hasBounds
+      ? Math.max(bounds.max.z - state.mapCenter.z - edgePadding, 0.001)
+      : 1;
+    const eastExposure = hasBounds
+      ? THREE.MathUtils.clamp(
+        (midpoint.x - state.mapCenter.x) / halfWidth,
+        0,
+        1
+      )
+      : 0;
+    const westExposure = hasBounds
+      ? THREE.MathUtils.clamp(
+        (state.mapCenter.x - midpoint.x) / halfWidth,
+        0,
+        1
+      )
+      : 0;
+    const southExposure = hasBounds
+      ? THREE.MathUtils.clamp(
+        (state.mapCenter.z - midpoint.z) / halfHeightSouth,
+        0,
+        1
+      )
+      : 0;
+    const northExposure = hasBounds
+      ? THREE.MathUtils.clamp(
+        (midpoint.z - state.mapCenter.z) / halfHeightNorth,
+        0,
+        1
+      )
+      : 0;
+    const edgeExposure = Math.max(
+      eastExposure * 0.8,
+      westExposure,
+      southExposure * 1.2,
+      northExposure * 0.45
+    );
+    const safeFactor = Math.max(0.35, 1 - eastExposure * 0.28 - westExposure * 0.3 - southExposure * 0.42);
+    const centerPullDirection = state.mapCenter.clone().sub(midpoint).setY(0);
+    if (centerPullDirection.lengthSq() > 0.000001) {
+      centerPullDirection.normalize();
+    }
+    const centerPull = Math.min(distance * 0.22, 0.34) * edgeExposure;
+    const sway = THREE.MathUtils.lerp(
+      Math.min(distance * 0.08, 0.09),
+      Math.min(distance * 0.22, 0.4),
+      distanceFactor
+    ) * safeFactor;
+    const drift = THREE.MathUtils.lerp(
+      Math.min(distance * 0.025, 0.03),
+      Math.min(distance * 0.09, 0.18),
+      distanceFactor
+    ) * safeFactor;
+    const point1 = clampPointToMap(
+      a.clone()
+        .lerp(b, 0.26)
+        .add(normal.clone().multiplyScalar(sway * inwardSign))
+        .add(dir.clone().multiplyScalar(-drift))
+        .add(centerPullDirection.clone().multiplyScalar(centerPull * 0.72))
+    );
+    const point2 = clampPointToMap(
+      a.clone()
+        .lerp(b, 0.5)
+        .add(normal.clone().multiplyScalar(sway * -0.58 * inwardSign))
+        .add(centerPullDirection.clone().multiplyScalar(centerPull))
+    );
+    const point3 = clampPointToMap(
+      a.clone()
+        .lerp(b, 0.76)
+        .add(normal.clone().multiplyScalar(sway * 0.82 * inwardSign))
+        .add(dir.clone().multiplyScalar(drift))
+        .add(centerPullDirection.clone().multiplyScalar(centerPull * 0.72))
+    );
+
+    return new THREE.CatmullRomCurve3(
+      [a, point1, point2, point3, b],
+      false,
+      'centripetal',
+      0.7
+    );
   }
 
   function createRibbonGeometry(curve, width, segments, yOffset = 0) {
@@ -158,8 +260,6 @@ export function createRouteController({ scene, state }) {
   }
 
   function buildRoute(curve, routeY) {
-    clearRoute();
-
     state.routeGroup = new THREE.Group();
 
     const routeSegments = 220;
