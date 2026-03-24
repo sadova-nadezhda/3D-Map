@@ -387,10 +387,12 @@ body.app-ready #app {
 
 .preloader__progress-value {
   position: absolute;
+  width: 100%;
   color: #ffffff;
   font-size: calc(14 * var(--width-multiplier));
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
+  text-align: center;
 }
 
 .preloader.is-launching .preloader__dust {
