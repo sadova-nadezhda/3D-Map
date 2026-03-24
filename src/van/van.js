@@ -52,10 +52,121 @@ export function createVanController({
     scene.add(state.vanRoot);
   }
 
-  function startRoute(start, end) {
-    state.activeRouteY = Math.max(start.y, end.y) + state.ROUTE_Y_OFFSET;
-    state.activeCurve = route.createElegantRouteCurve(start, end, state.activeRouteY);
-    route.buildRoute(state.activeCurve, state.activeRouteY);
+  function getRoutePathCityKeys(fromCityKey, toCityKey) {
+    if (!fromCityKey || !toCityKey) {
+      return null;
+    }
+
+    const firstCityKey = routeOrder[0];
+    const lastCityKey = routeOrder[routeOrder.length - 1];
+
+    if (
+      (fromCityKey === lastCityKey && toCityKey === firstCityKey) ||
+      (fromCityKey === firstCityKey && toCityKey === lastCityKey)
+    ) {
+      return [fromCityKey, toCityKey];
+    }
+
+    const fromIndex = routeOrder.indexOf(fromCityKey);
+    const toIndex = routeOrder.indexOf(toCityKey);
+
+    if (fromIndex === -1 || toIndex === -1) {
+      return null;
+    }
+
+    if (fromIndex === toIndex) {
+      return [fromCityKey];
+    }
+
+    const step = fromIndex < toIndex ? 1 : -1;
+    const cityKeys = [];
+
+    for (let index = fromIndex; ; index += step) {
+      cityKeys.push(routeOrder[index]);
+
+      if (index === toIndex) {
+        break;
+      }
+    }
+
+    return cityKeys;
+  }
+
+  function createRoutePathCurve(cityKeys, routeY) {
+    if (!cityKeys || cityKeys.length < 2) {
+      return null;
+    }
+
+    const path = new THREE.CurvePath();
+
+    for (let index = 0; index < cityKeys.length - 1; index += 1) {
+      const fromCityKey = cityKeys[index];
+      const toCityKey = cityKeys[index + 1];
+      const segmentStart = state.cityPositions.get(fromCityKey);
+      const segmentEnd = state.cityPositions.get(toCityKey);
+
+      if (!segmentStart || !segmentEnd) {
+        return null;
+      }
+
+      const segmentCurve = route.createElegantRouteCurve(
+        segmentStart,
+        segmentEnd,
+        routeY,
+        { fromCityKey, toCityKey }
+      );
+
+      route.buildRoute(segmentCurve, routeY, { fromCityKey, toCityKey });
+      path.add(segmentCurve);
+    }
+
+    return path;
+  }
+
+  function startRoute(start, end, options = {}) {
+    const routePathCityKeys = getRoutePathCityKeys(
+      options.fromCityKey,
+      options.toCityKey
+    );
+
+    if (routePathCityKeys && routePathCityKeys.length > 1) {
+      const routePoints = routePathCityKeys
+        .map((cityKey) => state.cityPositions.get(cityKey))
+        .filter(Boolean);
+
+      const maxRoutePointY = routePoints.reduce(
+        (maxY, point) => Math.max(maxY, point.y),
+        Math.max(start.y, end.y)
+      );
+
+      state.activeRouteY = maxRoutePointY + state.ROUTE_Y_OFFSET;
+
+      const pathCurve = createRoutePathCurve(
+        routePathCityKeys,
+        state.activeRouteY
+      );
+
+      if (pathCurve) {
+        state.activeCurve = pathCurve;
+      } else {
+        state.activeCurve = route.createElegantRouteCurve(
+          start,
+          end,
+          state.activeRouteY,
+          options
+        );
+        route.buildRoute(state.activeCurve, state.activeRouteY, options);
+      }
+    } else {
+      state.activeRouteY = Math.max(start.y, end.y) + state.ROUTE_Y_OFFSET;
+      state.activeCurve = route.createElegantRouteCurve(
+        start,
+        end,
+        state.activeRouteY,
+        options
+      );
+      route.buildRoute(state.activeCurve, state.activeRouteY, options);
+    }
 
     state.routeProgress = 0;
     state.routeDistance = 0;

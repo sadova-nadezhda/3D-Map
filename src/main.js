@@ -13,9 +13,7 @@ import { createRouteController } from './route/route.js';
 import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
 
-requestAnimationFrame(() => {
-  document.body.classList.remove('booting');
-});
+document.body.classList.remove('booting');
 
 const container = document.getElementById('scene-container');
 const mapPanel = document.querySelector('.map-panel');
@@ -66,7 +64,6 @@ let isPreloaderLaunching = false;
 let preloaderProgress = 0;
 let preloaderTarget = 0;
 let preloaderLastTime = 0;
-let preloaderReachedCompleteAt = 0;
 
 function startSceneAnimation() {
   if (hasAnimationStarted || !shouldStartAnimation) {
@@ -102,15 +99,14 @@ function launchPreloaderVan() {
 
   window.setTimeout(() => {
     finishPreloader();
-  }, 900);
+  }, 1350);
 }
 
 function updatePreloaderVisuals() {
-  const roundedProgress = Math.round(preloaderProgress);
-  preloaderValue.textContent = `${roundedProgress}%`;
+  preloaderValue.textContent = `${Math.round(preloaderProgress)}%`;
   preloader.style.setProperty('--preloader-progress', String(preloaderProgress / 100));
 
-  if (isSceneLoaded && roundedProgress >= 100) {
+  if (isSceneLoaded && preloaderProgress >= 100) {
     launchPreloaderVan();
   }
 }
@@ -138,22 +134,9 @@ function tickPreloader(time) {
 
   if (isSceneLoaded && 100 - preloaderProgress < 0.18) {
     preloaderProgress = 100;
-    if (!preloaderReachedCompleteAt) {
-      preloaderReachedCompleteAt = time;
-    }
   }
 
   updatePreloaderVisuals();
-
-  if (
-    isSceneLoaded &&
-    preloaderReachedCompleteAt &&
-    !isPreloaderLaunching &&
-    time - preloaderReachedCompleteAt > 700
-  ) {
-    launchPreloaderVan();
-  }
-
   requestAnimationFrame(tickPreloader);
 }
 
@@ -315,6 +298,7 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 
   if (!nextPoint || !state.vanRoot) return;
 
+  const previousCityKey = state.activeCity;
   state.activeCity = cityKey;
   labels.setActiveLabel(cityKey);
   cityTabs.setActiveCity(cityKey);
@@ -338,7 +322,10 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   const start = state.vanRoot.position.clone();
   const end = nextPoint.clone();
 
-  van.startRoute(start, end);
+  van.startRoute(start, end, {
+    fromCityKey: previousCityKey,
+    toCityKey: cityKey,
+  });
 }
 
 function onPointerDown(event) {

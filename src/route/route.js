@@ -50,14 +50,18 @@ export function createRouteController({ scene, state }) {
   );
 
   function clearRoute() {
-    if (!state.routeGroup) return;
+    const routeGroups = scene.children.filter(
+      (child) => child.userData?.isRouteGroup
+    );
 
-    scene.remove(state.routeGroup);
+    routeGroups.forEach((group) => {
+      scene.remove(group);
 
-    state.routeGroup.traverse((child) => {
-      if (child.geometry && child.geometry !== padGeometry) {
-        child.geometry.dispose();
-      }
+      group.traverse((child) => {
+        if (child.geometry && child.geometry !== padGeometry) {
+          child.geometry.dispose();
+        }
+      });
     });
 
     state.routeGroup = null;
@@ -68,9 +72,18 @@ export function createRouteController({ scene, state }) {
     state.endPad = null;
   }
 
-  function createElegantRouteCurve(start, end, routeY) {
+  function getRouteKey(fromCityKey, toCityKey) {
+    if (!fromCityKey || !toCityKey) {
+      return null;
+    }
+
+    return [fromCityKey, toCityKey].sort().join('->');
+  }
+
+  function createElegantRouteCurve(start, end, routeY, options = {}) {
     const a = start.clone();
     const b = end.clone();
+    const { fromCityKey = null, toCityKey = null } = options;
 
     a.y = routeY;
     b.y = routeY;
@@ -91,6 +104,8 @@ export function createRouteController({ scene, state }) {
     const hasBounds = Number.isFinite(bounds.min.x) && Number.isFinite(bounds.max.x);
     const edgePadding = 0.34;
 
+    // Ограничивает контрольные точки внутри контура карты.
+    // routeY отвечает только за высоту дороги, а не за ее форму на карте.
     const clampPointToMap = (point) => {
       if (!hasBounds) {
         point.y = routeY;
@@ -116,6 +131,22 @@ export function createRouteController({ scene, state }) {
       return point;
     };
 
+    // Сначала пробуем ручной маршрут для конкретных проблемных пар городов.
+    // Если ниже вернется curve, общий автогенератор уже не применяется.
+    const customCurve = createCustomRouteCurve({
+      fromCityKey,
+      toCityKey,
+      start: a,
+      end: b,
+      routeY,
+      clampPointToMap,
+    });
+
+    if (customCurve) {
+      return customCurve;
+    }
+
+    // Ниже общий алгоритм для всех остальных дорог.
     const distanceFactor = THREE.MathUtils.clamp((distance - 0.45) / 1.35, 0, 1);
     const midpoint = a.clone().lerp(b, 0.5);
     const halfWidth = hasBounds
@@ -206,6 +237,122 @@ export function createRouteController({ scene, state }) {
     );
   }
 
+  function createCustomRouteCurve({
+    fromCityKey,
+    toCityKey,
+    start,
+    end,
+    routeY,
+    clampPointToMap,
+  }) {
+    // Здесь перечислены пары городов, для которых маршрут задается вручную.
+    if (isRoutePair(fromCityKey, toCityKey, 'city_aqtay', 'city_turk')) {
+      return createAktauTurkestanCurve({
+        start,
+        end,
+        routeY,
+        clampPointToMap,
+      });
+    }
+
+    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_aqtay')) {
+      return createAtyrauAktauCurve({
+        start,
+        end,
+        routeY,
+        clampPointToMap,
+      });
+    }
+
+    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_turk')) {
+      return createAtyrauTurkestanCurve({
+        start,
+        end,
+        routeY,
+        clampPointToMap,
+      });
+    }
+
+    return null;
+  }
+
+  function isRoutePair(fromCityKey, toCityKey, cityA, cityB) {
+    const pair = [fromCityKey, toCityKey].filter(Boolean).sort().join('->');
+    return pair === [cityA, cityB].sort().join('->');
+  }
+
+  function createAktauTurkestanCurve({ start, end, routeY, clampPointToMap }) {
+    // Тестовый midpoint. Пока смещение 0, линия идет почти ровно.
+    // Меняй первое число в new THREE.Vector3(x, 0, z):
+    //  0.1 -> дуга вправо
+    // -0.1 -> дуга влево
+    const point1 = clampPointToMap(
+      start.clone().lerp(end, 0.5).add(new THREE.Vector3(-1.2, 0, 0))
+    );
+
+    return new THREE.CatmullRomCurve3(
+      [start, point1, end],
+      false,
+      'centripetal',
+      // Меньше значение -> ближе к прямым сегментам.
+      // Больше значение -> дуга плавнее и свободнее.
+      0.2
+    );
+  }
+
+  function createAtyrauAktauCurve({ start, end }) {
+    // Тестовый midpoint. Пока смещение 0, поэтому линия остается ровной.
+    const point1 = start.clone().lerp(end, 0.5).add(new THREE.Vector3(0.3, 0, 0));
+
+    return new THREE.CatmullRomCurve3(
+      [start, point1, end],
+      false,
+      'centripetal',
+      0.2
+    );
+  }
+
+  function createAtyrauTurkestanCurve({ start, end, routeY, clampPointToMap }) {
+    // Здесь логика такая же, как выше:
+    // lerp задает место точки на маршруте,
+    // add(Vector3(x, 0, z)) задает смещение этой точки.
+    const aqtobe = state.cityPositions.get('city_aqtobe');
+
+    if (!aqtobe) {
+      return null;
+    }
+
+    const point1 = clampPointToMap(
+      start
+        .clone()
+        .lerp(aqtobe, 0.42)
+        .add(new THREE.Vector3(0.12, 0, -0.04))
+    );
+    const point2 = clampPointToMap(
+      aqtobe
+        .clone()
+        .lerp(end, 0.34)
+        .add(new THREE.Vector3(0.22, 0, -0.04))
+    );
+    const point3 = clampPointToMap(
+      start
+        .clone()
+        .lerp(end, 0.8)
+        .add(new THREE.Vector3(0.18, 0, -0.08))
+    );
+
+    point1.y = routeY;
+    point2.y = routeY;
+    point3.y = routeY;
+
+    return new THREE.CatmullRomCurve3(
+      [start, point1, point2, point3, end],
+      false,
+      'centripetal',
+      0.7
+    );
+  }
+
   function createRibbonGeometry(curve, width, segments, yOffset = 0) {
     const points = curve.getPoints(segments);
     const positions = [];
@@ -259,8 +406,24 @@ export function createRouteController({ scene, state }) {
     return geometry;
   }
 
-  function buildRoute(curve, routeY) {
+  function buildRoute(curve, routeY, options = {}) {
+    const { fromCityKey = null, toCityKey = null } = options;
+    const routeKey = getRouteKey(fromCityKey, toCityKey);
+
+    if (routeKey) {
+      const existingRouteGroup = scene.children.find(
+        (child) => child.userData?.isRouteGroup && child.userData?.routeKey === routeKey
+      );
+
+      if (existingRouteGroup) {
+        state.routeGroup = existingRouteGroup;
+        return;
+      }
+    }
+
     state.routeGroup = new THREE.Group();
+    state.routeGroup.userData.isRouteGroup = true;
+    state.routeGroup.userData.routeKey = routeKey;
 
     const routeSegments = 220;
 

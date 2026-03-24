@@ -4,10 +4,59 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Street Хана</title>
-    <script type="module" crossorigin src="/assets/index-C2jRcVpW.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-4PouyzKx.css">
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #8b3c2f url("/media/preloader-bg.webp") center center / cover no-repeat;
+      }
+
+      body.booting {
+        overflow: hidden;
+      }
+
+      body.booting #preloader,
+      #app {
+        visibility: hidden;
+        opacity: 0;
+      }
+
+      body:not(.booting) #preloader:not([hidden]):not(.is-hidden) {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      body.app-ready #app {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-BAXr0yDg.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dn7SlbMp.css">
   </head>
-  <body>
+  <body class="booting">
+    <div id="preloader" class="preloader" aria-live="polite">
+      <div class="preloader__panel">
+        <div class="preloader__track" aria-hidden="true">
+          <div class="preloader__lane"></div>
+
+          <div id="preloaderVan" class="preloader__van">
+            <img class="preloader__van-image" src="/media/preloader-truck.webp" alt="" />
+            <img class="preloader__wheel preloader__wheel--front" src="/media/preloader-wheel.webp" alt="" />
+            <img class="preloader__wheel preloader__wheel--rear" src="/media/preloader-wheel.webp" alt="" />
+            <div class="preloader__dust"></div>
+          </div>
+
+          <div class="preloader__progress">
+            <div class="preloader__progress-ring">
+              <span id="preloaderValue" class="preloader__progress-value">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="app">
       <main class="experience-shell">
         <section class="map-panel">
@@ -80,7 +129,7 @@
                   <span id="modalImageLabel" class="detail-modal__image-label"></span>
                 </div>
 
-                <section class="detail-modal__map-card">
+                <div class="detail-modal__map-card">
                   <div class="detail-modal__map-preview">
                     <div class="detail-modal__map-marker"></div>
                   </div>
@@ -93,7 +142,7 @@
                   >
                     Открыть на Яндекс Карте
                   </a>
-                </section>
+                </div>
               </aside>
 
               <div class="detail-modal__content">
@@ -110,16 +159,16 @@
 
                 <p id="modalDescription" class="detail-modal__lead"></p>
 
-                <section class="detail-modal__section">
+                <div class="detail-modal__section">
                   <p class="detail-modal__section-label">Популярный стритфуд города</p>
                   <h3 id="modalDishTitle" class="detail-modal__section-title"></h3>
                   <p id="modalDishDescription" class="detail-modal__section-text"></p>
-                </section>
+                </div>
 
-                <section class="detail-modal__section">
+                <div class="detail-modal__section">
                   <p class="detail-modal__section-label">О заведении</p>
                   <p id="modalPlaceDescription" class="detail-modal__section-text"></p>
-                </section>
+                </div>
               </div>
             </article>
           </div>
