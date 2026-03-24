@@ -780,7 +780,7 @@ body.app-ready #app {
 
 .preview-card__title {
   margin: 0 0 calc(8 * var(--width-multiplier));
-  font-size: clamp(calc(20 * var(--width-multiplier)), 4vw, calc(24 * var(--width-multiplier)));
+  font-size: clamp(calc(18 * var(--width-multiplier)), 4vw, calc(24 * var(--width-multiplier)));
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.4;
@@ -975,7 +975,7 @@ body.app-ready #app {
 
 .detail-modal__title {
   margin: 0 0 calc(6 * var(--width-multiplier));
-  font-size: clamp(calc(24 * var(--width-multiplier)), 4vw, calc(36 * var(--width-multiplier)));
+  font-size: clamp(calc(22 * var(--width-multiplier)), 4vw, calc(36 * var(--width-multiplier)));
   line-height: 1.4em;
   letter-spacing: -0.02em;
 }
@@ -1316,6 +1316,9 @@ body.app-ready #app {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    font-size: calc(14 * var(--width-multiplier));
+    letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   .preview-card__button {
