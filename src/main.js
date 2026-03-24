@@ -13,7 +13,9 @@ import { createRouteController } from './route/route.js';
 import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
 
-document.body.classList.remove('booting');
+requestAnimationFrame(() => {
+  document.body.classList.remove('booting');
+});
 
 const container = document.getElementById('scene-container');
 const mapPanel = document.querySelector('.map-panel');
@@ -64,6 +66,7 @@ let isPreloaderLaunching = false;
 let preloaderProgress = 0;
 let preloaderTarget = 0;
 let preloaderLastTime = 0;
+let preloaderReachedCompleteAt = 0;
 
 function startSceneAnimation() {
   if (hasAnimationStarted || !shouldStartAnimation) {
@@ -99,14 +102,15 @@ function launchPreloaderVan() {
 
   window.setTimeout(() => {
     finishPreloader();
-  }, 1350);
+  }, 900);
 }
 
 function updatePreloaderVisuals() {
-  preloaderValue.textContent = `${Math.round(preloaderProgress)}%`;
+  const roundedProgress = Math.round(preloaderProgress);
+  preloaderValue.textContent = `${roundedProgress}%`;
   preloader.style.setProperty('--preloader-progress', String(preloaderProgress / 100));
 
-  if (isSceneLoaded && preloaderProgress >= 100) {
+  if (isSceneLoaded && roundedProgress >= 100) {
     launchPreloaderVan();
   }
 }
@@ -134,9 +138,22 @@ function tickPreloader(time) {
 
   if (isSceneLoaded && 100 - preloaderProgress < 0.18) {
     preloaderProgress = 100;
+    if (!preloaderReachedCompleteAt) {
+      preloaderReachedCompleteAt = time;
+    }
   }
 
   updatePreloaderVisuals();
+
+  if (
+    isSceneLoaded &&
+    preloaderReachedCompleteAt &&
+    !isPreloaderLaunching &&
+    time - preloaderReachedCompleteAt > 700
+  ) {
+    launchPreloaderVan();
+  }
+
   requestAnimationFrame(tickPreloader);
 }
 

@@ -9,15 +9,27 @@
       body {
         margin: 0;
         min-height: 100%;
-        background: #000;
+        background: #8b3c2f url("/media/preloader-bg.webp") center center / cover no-repeat;
       }
 
       body.booting {
         overflow: hidden;
       }
 
-      body.booting > * {
+      body.booting #preloader,
+      #app {
+        visibility: hidden;
         opacity: 0;
+      }
+
+      body:not(.booting) #preloader:not([hidden]):not(.is-hidden) {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      body.app-ready #app {
+        visibility: visible;
+        opacity: 1;
       }
     </style>
   </head>
@@ -28,9 +40,9 @@
           <div class="preloader__lane"></div>
 
           <div id="preloaderVan" class="preloader__van">
-            <img class="preloader__van-image" src="/media/preloader-truck.png" alt="" />
-            <img class="preloader__wheel preloader__wheel--front" src="/media/preloader-wheel.png" alt="" />
-            <img class="preloader__wheel preloader__wheel--rear" src="/media/preloader-wheel.png" alt="" />
+            <img class="preloader__van-image" src="/media/preloader-truck.webp" alt="" />
+            <img class="preloader__wheel preloader__wheel--front" src="/media/preloader-wheel.webp" alt="" />
+            <img class="preloader__wheel preloader__wheel--rear" src="/media/preloader-wheel.webp" alt="" />
             <div class="preloader__dust"></div>
           </div>
 

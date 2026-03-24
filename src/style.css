@@ -203,6 +203,16 @@ body:not(.app-ready) {
   overflow: hidden;
 }
 
+body:not(.app-ready) #app {
+  visibility: hidden;
+  opacity: 0;
+}
+
+body.app-ready #app {
+  visibility: visible;
+  opacity: 1;
+}
+
 .preloader {
   --preloader-progress: 0;
   position: fixed;
@@ -227,7 +237,7 @@ body:not(.app-ready) {
   content: "";
   position: absolute;
   inset: -4% -10%;
-  background: url("/media/preloader-bg.png") center center / cover no-repeat;
+  background: url("/media/preloader-bg.webp") center center / cover no-repeat;
   transform: translate3d(calc(var(--preloader-progress) * -16%), 0, 0) scale(1.18);
   transform-origin: center center;
   will-change: transform;
@@ -396,7 +406,7 @@ body:not(.app-ready) {
   }
 
   .preloader__track {
-    height: min(calc((100vw - 24px) * 1.12), calc(100vh - 24px));
+    /* height: min(calc((100vw - 24px) * 1.12), calc(100vh - 24px)); */
     min-height: 360px;
   }
 
