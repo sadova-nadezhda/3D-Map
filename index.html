@@ -57,7 +57,7 @@
 
     <div id="app">
       <main class="experience-shell">
-        <section class="map-panel">
+        <section id="mapPanelSection" class="map-panel">
           <div class="map-panel__hero">
             <div class="map-panel__hero-top">
               <p class="map-panel__brand">StreetХана</p>
@@ -76,6 +76,11 @@
                 </a>
               </div>
             </div>
+          </div>
+
+          <div class="map-zoom" role="group" aria-label="Управление масштабом карты">
+            <button id="zoomInButton" class="map-zoom__button" type="button" aria-label="Увеличить карту">+</button>
+            <button id="zoomOutButton" class="map-zoom__button" type="button" aria-label="Уменьшить карту">−</button>
           </div>
 
           <div id="scene-container"></div>
@@ -234,6 +239,24 @@
                 </button>
               </div>
             </div>
+
+            <a class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M15 6.5L9 4L3 6.5V18L9 15.5L15 18L21 15.5V4L15 6.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9 4V15.5M15 6.5V18"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span>К карте</span>
+            </a>
           </div>
         </section>
       </main>

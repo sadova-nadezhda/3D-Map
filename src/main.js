@@ -1,7 +1,5 @@
 import './style.css';
-import 'lenis/dist/lenis.css';
 import * as THREE from 'three';
-import Lenis from 'lenis';
 
 import { CITY_CONTENT, ROUTE_ORDER } from './config/cities.js';
 import { createAppState } from './core/state.js';
@@ -16,7 +14,10 @@ import { loadScene } from './loaders/loadScene.js';
 document.body.classList.remove('booting');
 
 const container = document.getElementById('scene-container');
+const experienceShell = document.querySelector('.experience-shell');
 const mapPanel = document.querySelector('.map-panel');
+const watchTrailerButton = document.getElementById('watchTrailerButton');
+const featureMapLink = document.querySelector('.feature-panel__map-link');
 const labelsRoot = document.getElementById('labels-root');
 const cityTabsRoot = document.getElementById('cityTabs');
 const startJourneyButton = document.getElementById('startJourneyButton');
@@ -48,15 +49,27 @@ const preloaderValue = document.getElementById('preloaderValue');
 const sceneContext = createSceneContext({ container });
 const state = createAppState();
 const mobileIsoOffset = new THREE.Vector3(-2.9, 4.6, 2.7);
+const desktopOverviewTarget = new THREE.Vector3(0, 0.55, 0);
+const desktopOverviewOffset = new THREE.Vector3(3, 5.45, 4.5);
+const desktopPanTarget = desktopOverviewTarget.clone();
+const mobileOverviewTarget = new THREE.Vector3(0.15, 0.55, 0);
+const mobileOverviewOffset = new THREE.Vector3(0.75, 6.75, 5.8);
 const cameraDesiredPosition = new THREE.Vector3();
 const cameraDesiredTarget = new THREE.Vector3();
-const lenis = new Lenis({
-  smoothWheel: true,
-  lerp: 0.08,
-  touchMultiplier: 1.1,
-  anchors: true,
-});
+const mapPointerStart = new THREE.Vector2();
+const mapPointerPrevious = new THREE.Vector2();
+const mapPointerDelta = new THREE.Vector2();
+const mapPanForward = new THREE.Vector3();
+const mapPanRight = new THREE.Vector3();
+const mapPanOffset = new THREE.Vector3();
+const MAP_ZOOM_MIN = 0.55;
+const MAP_ZOOM_MAX = 1.25;
 const almatyScreenPosition = new THREE.Vector3();
+let mapZoomScale = 1;
+let isMapPointerDown = false;
+let isMapDragging = false;
+let activeMapPointerId = null;
+let suppressMapClickUntil = 0;
 let shouldStartAnimation = false;
 let hasAnimationStarted = false;
 let isSceneLoaded = false;
@@ -65,6 +78,14 @@ let isPreloaderLaunching = false;
 let preloaderProgress = 0;
 let preloaderTarget = 0;
 let preloaderLastTime = 0;
+
+function setActiveView(view) {
+  if (!experienceShell) {
+    return;
+  }
+
+  experienceShell.dataset.view = view;
+}
 
 function startSceneAnimation() {
   if (hasAnimationStarted || !shouldStartAnimation) {
@@ -223,12 +244,13 @@ function updateCameraLayout() {
 
   if (isMobile) {
     sceneContext.camera.fov = 34;
-    sceneContext.camera.position.set(0.9, 7.3, 5.8);
-    sceneContext.CAMERA_TARGET.set(0.15, 0.55, 0);
+    sceneContext.CAMERA_TARGET.copy(mobileOverviewTarget);
+    sceneContext.camera.position.copy(mobileOverviewTarget).addScaledVector(mobileOverviewOffset, mapZoomScale);
   } else {
+    clampDesktopPanTarget();
     sceneContext.camera.fov = 40;
-    sceneContext.camera.position.set(3, 6, 4.5);
-    sceneContext.CAMERA_TARGET.set(0, 0.55, 0);
+    sceneContext.CAMERA_TARGET.copy(desktopPanTarget);
+    sceneContext.camera.position.copy(desktopPanTarget).addScaledVector(desktopOverviewOffset, mapZoomScale);
   }
 }
 
@@ -242,11 +264,157 @@ function updateMobileFollowCamera(delta) {
   cameraDesiredTarget.copy(state.vanRoot.position);
   cameraDesiredTarget.y = state.vanRoot.position.y + 0.28;
 
-  cameraDesiredPosition.copy(state.vanRoot.position).add(mobileIsoOffset);
+  cameraDesiredPosition.copy(state.vanRoot.position).addScaledVector(mobileIsoOffset, mapZoomScale);
 
   const followLerp = 1 - Math.exp(-delta * 4.5);
   sceneContext.camera.position.lerp(cameraDesiredPosition, followLerp);
   sceneContext.CAMERA_TARGET.lerp(cameraDesiredTarget, followLerp);
+}
+
+function setMapZoom(nextZoomScale) {
+  const clampedZoom = THREE.MathUtils.clamp(nextZoomScale, MAP_ZOOM_MIN, MAP_ZOOM_MAX);
+
+  if (Math.abs(clampedZoom - mapZoomScale) < 0.001) {
+    return;
+  }
+
+  mapZoomScale = clampedZoom;
+
+  if (window.innerWidth <= 768 && state.vanRoot) {
+    cameraDesiredTarget.copy(state.vanRoot.position);
+    cameraDesiredTarget.y = state.vanRoot.position.y + 0.28;
+    cameraDesiredPosition.copy(state.vanRoot.position).addScaledVector(mobileIsoOffset, mapZoomScale);
+
+    sceneContext.CAMERA_TARGET.copy(cameraDesiredTarget);
+    sceneContext.camera.position.copy(cameraDesiredPosition);
+  } else {
+    clampDesktopPanTarget();
+    updateCameraLayout();
+  }
+
+  sceneContext.camera.lookAt(sceneContext.CAMERA_TARGET);
+  labels.updateLabels();
+  updateMapHintPosition();
+}
+
+function clampDesktopPanTarget() {
+  desktopPanTarget.y = desktopOverviewTarget.y;
+
+  if (state.mapBounds.isEmpty()) {
+    return;
+  }
+
+  const boundsWidth = state.mapBounds.max.x - state.mapBounds.min.x;
+  const boundsDepth = state.mapBounds.max.z - state.mapBounds.min.z;
+  const panLimitX = Math.min(boundsWidth * 0.34, (boundsWidth * 0.18) / mapZoomScale);
+  const panLimitZ = Math.min(boundsDepth * 0.34, (boundsDepth * 0.18) / mapZoomScale);
+
+  desktopPanTarget.x = THREE.MathUtils.clamp(
+    desktopPanTarget.x,
+    state.mapCenter.x - panLimitX,
+    state.mapCenter.x + panLimitX
+  );
+  desktopPanTarget.z = THREE.MathUtils.clamp(
+    desktopPanTarget.z,
+    state.mapCenter.z - panLimitZ,
+    state.mapCenter.z + panLimitZ
+  );
+}
+
+function canPanMap() {
+  return window.innerWidth > 768 && !detailOverlay.classList.contains('active');
+}
+
+function panMapByPointerDelta(deltaX, deltaY) {
+  if (state.mapBounds.isEmpty()) {
+    return;
+  }
+
+  const boundsWidth = state.mapBounds.max.x - state.mapBounds.min.x;
+  const boundsDepth = state.mapBounds.max.z - state.mapBounds.min.z;
+  const panelWidth = container.clientWidth || window.innerWidth;
+  const worldUnitsPerPixel = (Math.max(boundsWidth, boundsDepth) / panelWidth) * 1.2 * mapZoomScale;
+
+  mapPanForward.copy(sceneContext.CAMERA_TARGET).sub(sceneContext.camera.position).setY(0);
+
+  if (mapPanForward.lengthSq() < 0.000001) {
+    return;
+  }
+
+  mapPanForward.normalize();
+  mapPanRight.crossVectors(mapPanForward, sceneContext.camera.up).setY(0).normalize();
+
+  mapPanOffset.copy(mapPanRight).multiplyScalar(-deltaX * worldUnitsPerPixel);
+  mapPanOffset.addScaledVector(mapPanForward, deltaY * worldUnitsPerPixel);
+
+  desktopPanTarget.add(mapPanOffset);
+  clampDesktopPanTarget();
+  updateCameraLayout();
+  sceneContext.camera.lookAt(sceneContext.CAMERA_TARGET);
+  labels.updateLabels();
+  updateMapHintPosition();
+}
+
+function onMapWheel(event) {
+  if (window.innerWidth <= 768) {
+    return;
+  }
+
+  event.preventDefault();
+  setMapZoom(mapZoomScale + event.deltaY * 0.0012);
+}
+
+function onMapPointerDown(event) {
+  if (!canPanMap() || event.button !== 0) {
+    return;
+  }
+
+  activeMapPointerId = event.pointerId;
+  isMapPointerDown = true;
+  isMapDragging = false;
+  mapPointerStart.set(event.clientX, event.clientY);
+  mapPointerPrevious.copy(mapPointerStart);
+  sceneContext.renderer.domElement.setPointerCapture(event.pointerId);
+}
+
+function onMapPointerMove(event) {
+  if (!isMapPointerDown || event.pointerId !== activeMapPointerId) {
+    return;
+  }
+
+  mapPointerDelta.set(event.clientX - mapPointerStart.x, event.clientY - mapPointerStart.y);
+
+  if (!isMapDragging && mapPointerDelta.lengthSq() > 16) {
+    isMapDragging = true;
+    suppressMapClickUntil = performance.now() + 250;
+    mapPanel.classList.add('map-panel--dragging');
+  }
+
+  if (!isMapDragging) {
+    return;
+  }
+
+  const deltaX = event.clientX - mapPointerPrevious.x;
+  const deltaY = event.clientY - mapPointerPrevious.y;
+
+  mapPointerPrevious.set(event.clientX, event.clientY);
+  panMapByPointerDelta(deltaX, deltaY);
+  event.preventDefault();
+}
+
+function stopMapPointerInteraction(event) {
+  if (!isMapPointerDown || event.pointerId !== activeMapPointerId) {
+    return;
+  }
+
+  if (sceneContext.renderer.domElement.hasPointerCapture(event.pointerId)) {
+    sceneContext.renderer.domElement.releasePointerCapture(event.pointerId);
+  }
+
+  isMapPointerDown = false;
+  isMapDragging = false;
+  activeMapPointerId = null;
+  mapPanel.classList.remove('map-panel--dragging');
 }
 
 function hideMapHint() {
@@ -339,8 +507,20 @@ function openJourneyStart() {
 }
 
 startJourneyButton?.addEventListener('click', openJourneyStart);
+watchTrailerButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  setActiveView('feature');
+});
+featureMapLink?.addEventListener('click', (event) => {
+  event.preventDefault();
+  setActiveView('map');
+});
 
-function onPointerDown(event) {
+function onMapClick(event) {
+  if (performance.now() < suppressMapClickUntil) {
+    return;
+  }
+
   if (state.isMoving) return;
 
   const rect = sceneContext.renderer.domElement.getBoundingClientRect();
@@ -377,7 +557,6 @@ function onResize() {
 }
 
 function animate(time) {
-  lenis.raf(time);
   requestAnimationFrame(animate);
 
   const delta = state.clock.getDelta();
@@ -392,9 +571,15 @@ function animate(time) {
 
 closeHintButton.addEventListener('click', hideMapHint);
 
-sceneContext.renderer.domElement.addEventListener('pointerdown', onPointerDown);
+sceneContext.renderer.domElement.addEventListener('wheel', onMapWheel, { passive: false });
+sceneContext.renderer.domElement.addEventListener('pointerdown', onMapPointerDown);
+sceneContext.renderer.domElement.addEventListener('pointermove', onMapPointerMove);
+sceneContext.renderer.domElement.addEventListener('pointerup', stopMapPointerInteraction);
+sceneContext.renderer.domElement.addEventListener('pointercancel', stopMapPointerInteraction);
+sceneContext.renderer.domElement.addEventListener('click', onMapClick);
 window.addEventListener('resize', onResize);
 
+setActiveView('map');
 updateCameraLayout();
 onResize();
 mapPanel.classList.add('map-panel--hint');

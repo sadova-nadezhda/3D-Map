@@ -32,8 +32,8 @@
         opacity: 1;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-DbGO6Qw2.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-D7pOKqHJ.css">
+    <script type="module" crossorigin src="/assets/index-DTaUN61t.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D-Wy8B6N.css">
   </head>
   <body class="booting">
     <div id="preloader" class="preloader" aria-live="polite">
@@ -59,11 +59,11 @@
 
     <div id="app">
       <main class="experience-shell">
-        <section class="map-panel">
+        <section id="mapPanelSection" class="map-panel">
           <div class="map-panel__hero">
             <div class="map-panel__hero-top">
               <p class="map-panel__brand">StreetХана</p>
-              <a class="map-panel__hero-link" href="#featurePanel">Посмотреть в Кинопоиск</a>
+              <a class="map-panel__hero-link" href="https://www.kinopoisk.ru/" target="_blank" rel="noopener noreferrer">Посмотреть в Кинопоиск</a>
             </div>
 
             <div class="map-panel__hero-body">
@@ -80,6 +80,11 @@
             </div>
           </div>
 
+          <div class="map-zoom" role="group" aria-label="Управление масштабом карты">
+            <button id="zoomInButton" class="map-zoom__button" type="button" aria-label="Увеличить карту">+</button>
+            <button id="zoomOutButton" class="map-zoom__button" type="button" aria-label="Уменьшить карту">−</button>
+          </div>
+
           <div id="scene-container"></div>
           <div class="map-surface"></div>
 
@@ -94,7 +99,12 @@
             >
               ×
             </button>
-            <p class="map-hint__title">Откройте мир вкуса</p>
+            <div class="map-hint__top">
+              <div class="map-hint__img">
+                <img src="/media/book.png" alt="">
+              </div>
+              <p class="map-hint__title">Путь начинается здесь!</p>
+            </div>
             <p class="map-hint__text">
               Следуйте по маршруту и нажимайте на города, чтобы открывать новые места и истории.
             </p>
@@ -219,7 +229,7 @@
               </p>
 
               <div class="feature-panel__actions">
-                <a class="feature-panel__button feature-panel__button--primary" href="#">
+                <a class="feature-panel__button feature-panel__button--primary" href="https://www.kinopoisk.ru/" target="_blank" rel="noopener noreferrer">
                   Смотреть на КиноПоиск
                 </a>
                 <button
@@ -231,6 +241,24 @@
                 </button>
               </div>
             </div>
+
+            <a class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M15 6.5L9 4L3 6.5V18L9 15.5L15 18L21 15.5V4L15 6.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9 4V15.5M15 6.5V18"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span>К карте</span>
+            </a>
           </div>
         </section>
       </main>

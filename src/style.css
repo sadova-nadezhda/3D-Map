@@ -172,6 +172,10 @@ Fonts
   --width-base: 1920;
   --width-current: 100vw;
   --width-multiplier: calc(var(--width-current) / var(--width-base));
+  --shell-padding: calc(32 * var(--width-multiplier));
+  --shell-gap: calc(32 * var(--width-multiplier));
+  --panel-height: calc(100vh - (2 * var(--shell-padding)));
+  --feature-shift: calc(-1 * (var(--panel-height) + var(--shell-gap)));
 }
 
 
@@ -187,6 +191,8 @@ Fonts
   :root {
     --width-base: 375;
     --width-current: 100vmin;
+    --shell-padding: calc(16 * var(--width-multiplier));
+    --shell-gap: calc(14 * var(--width-multiplier));
   }
 }
 
@@ -202,6 +208,8 @@ body {
 
 body {
   color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body.modal-open {
@@ -459,29 +467,47 @@ body.app-ready #app {
 }
 
 #app {
-  min-height: 100vh;
-  padding: calc(32 * var(--width-multiplier));
+  height: 100vh;
+  padding: var(--shell-padding);
+  overflow: hidden;
 }
 
 .experience-shell {
   display: flex;
   flex-direction: column;
-  gap: calc(32 * var(--width-multiplier));
+  gap: var(--shell-gap);
   width: 100%;
+  height: 100%;
   margin: 0 auto;
+  transition: transform 0.72s cubic-bezier(0.22, 0.77, 0.2, 1);
+  will-change: transform;
+}
+
+.experience-shell[data-view="map"] {
+  transform: translate3d(0, 0, 0);
+}
+
+.experience-shell[data-view="feature"] {
+  transform: translate3d(0, var(--feature-shift), 0);
 }
 
 .map-panel,
 .feature-panel {
   position: relative;
   overflow: hidden;
+  flex: 0 0 auto;
   border-radius: calc(32 * var(--width-multiplier));
   box-shadow: var(--panel-shadow);
-  min-height: calc(100vh - calc(64 * var(--width-multiplier)));
+  min-height: var(--panel-height);
+  height: var(--panel-height);
 }
 
 .map-panel {
   background: linear-gradient(135deg, #a86554 0%, #9f624f 40%, #67392d 100%);
+}
+
+#mapPanelSection {
+  scroll-margin-top: calc(32 * var(--width-multiplier));
 }
 
 .map-panel::after {
@@ -514,6 +540,11 @@ body.app-ready #app {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: grab;
+}
+
+.map-panel.map-panel--dragging #scene-container canvas {
+  cursor: grabbing;
 }
 
 .map-surface {
@@ -637,6 +668,10 @@ body.app-ready #app {
 .map-panel__hero-button--secondary:hover {
   background: rgba(20, 18, 17, 0.98);
   box-shadow: 0 calc(18 * var(--width-multiplier)) calc(32 * var(--width-multiplier)) rgba(21, 9, 5, 0.24);
+}
+
+.map-zoom {
+  display: none;
 }
 
 #labels-root {
@@ -1226,9 +1261,9 @@ body.app-ready #app {
   max-width: calc(560 * var(--width-multiplier));
   margin: 0;
   color: rgba(255, 255, 255, 0.94);
-  font-size: clamp(calc(17 * var(--width-multiplier)), 1.75vw, calc(19 * var(--width-multiplier)));
-  line-height: 1.22;
-  text-wrap: balance;
+  font-size: calc(16 * var(--width-multiplier));
+  line-height: 1.5;
+  letter-spacing: -0.04em;
 }
 
 .feature-panel__actions {
@@ -1282,6 +1317,47 @@ body.app-ready #app {
   height: calc(42 * var(--width-multiplier));
   object-fit: contain;
   transition: transform 0.24s ease;
+}
+
+.feature-panel__map-link {
+  position: absolute;
+  right: calc(32 * var(--width-multiplier));
+  bottom: calc(32 * var(--width-multiplier));
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(10 * var(--width-multiplier));
+  min-height: calc(52 * var(--width-multiplier));
+  padding: 0 calc(18 * var(--width-multiplier));
+  border-radius: calc(999 * var(--width-multiplier));
+  border: calc(1 * var(--width-multiplier)) solid rgba(255, 255, 255, 0.22);
+  background: rgba(17, 17, 17, 0.28);
+  color: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(calc(14 * var(--width-multiplier)));
+  -webkit-backdrop-filter: blur(calc(14 * var(--width-multiplier)));
+  box-shadow: 0 calc(16 * var(--width-multiplier)) calc(34 * var(--width-multiplier)) rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.24s ease,
+    background 0.24s ease,
+    box-shadow 0.24s ease;
+}
+
+.feature-panel__map-link:hover {
+  transform: translateY(calc(-2 * var(--width-multiplier)));
+  background: rgba(17, 17, 17, 0.42);
+  box-shadow: 0 calc(20 * var(--width-multiplier)) calc(40 * var(--width-multiplier)) rgba(0, 0, 0, 0.24);
+}
+
+.feature-panel__map-link svg {
+  width: calc(20 * var(--width-multiplier));
+  height: calc(20 * var(--width-multiplier));
+  flex: 0 0 auto;
+}
+
+.feature-panel__map-link span {
+  font-size: calc(14 * var(--width-multiplier));
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .feature-panel__actions:hover .feature-panel__button--primary {
@@ -1349,18 +1425,9 @@ body.app-ready #app {
 }
 
 @media (max-width: 767px) {
-  #app {
-    padding: calc(16 * var(--width-multiplier));
-  }
-
-  .experience-shell {
-    gap: calc(14 * var(--width-multiplier));
-  }
-
   .map-panel,
   .feature-panel {
     border-radius: calc(16 * var(--width-multiplier));
-    min-height: calc(100vh - calc(32 * var(--width-multiplier)));
   }
 
   .map-panel__hero {
@@ -1501,9 +1568,10 @@ body.app-ready #app {
   .feature-panel__media {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    padding: calc(32 * var(--width-multiplier)) calc(16 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
+    gap: calc(16 * var(--width-multiplier));
+    padding: calc(80 * var(--width-multiplier)) calc(16 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
   }
 
   .feature-panel__logo-image {
@@ -1517,10 +1585,6 @@ body.app-ready #app {
     gap: calc(16 * var(--width-multiplier));
     width: 100%;
     transform: none;
-  }
-
-  .feature-panel__story {
-    font-size: calc(17 * var(--width-multiplier));
   }
 
   .feature-panel__actions {
@@ -1540,6 +1604,25 @@ body.app-ready #app {
   .feature-panel__button--icon img {
     width: calc(34 * var(--width-multiplier));
     height: calc(34 * var(--width-multiplier));
+  }
+
+  .feature-panel__map-link {
+    right: calc(16 * var(--width-multiplier));
+    top: calc(16 * var(--width-multiplier));
+    bottom: auto;
+    /* bottom: calc(84 * var(--width-multiplier)); */
+    min-height: calc(42 * var(--width-multiplier));
+    padding: 0 calc(14 * var(--width-multiplier));
+    gap: calc(8 * var(--width-multiplier));
+  }
+
+  .feature-panel__map-link svg {
+    width: calc(16 * var(--width-multiplier));
+    height: calc(16 * var(--width-multiplier));
+  }
+
+  .feature-panel__map-link span {
+    font-size: calc(12 * var(--width-multiplier));
   }
 }
 
