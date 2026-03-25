@@ -19,6 +19,7 @@ const container = document.getElementById('scene-container');
 const mapPanel = document.querySelector('.map-panel');
 const labelsRoot = document.getElementById('labels-root');
 const cityTabsRoot = document.getElementById('cityTabs');
+const startJourneyButton = document.getElementById('startJourneyButton');
 const previewCard = document.getElementById('previewCard');
 const previewImage = document.getElementById('previewImage');
 const previewTag = document.getElementById('previewTag');
@@ -327,6 +328,17 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
     toCityKey: cityKey,
   });
 }
+
+function openJourneyStart() {
+  const currentCity = state.activeCity || ROUTE_ORDER[0];
+
+  if (!currentCity) return;
+
+  hideMapHint();
+  selectCity(currentCity);
+}
+
+startJourneyButton?.addEventListener('click', openJourneyStart);
 
 function onPointerDown(event) {
   if (state.isMoving) return;

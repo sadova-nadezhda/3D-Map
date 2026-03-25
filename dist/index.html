@@ -32,8 +32,8 @@
         opacity: 1;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-BAXr0yDg.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dn7SlbMp.css">
+    <script type="module" crossorigin src="/assets/index-DbGO6Qw2.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D7pOKqHJ.css">
   </head>
   <body class="booting">
     <div id="preloader" class="preloader" aria-live="polite">
@@ -60,6 +60,26 @@
     <div id="app">
       <main class="experience-shell">
         <section class="map-panel">
+          <div class="map-panel__hero">
+            <div class="map-panel__hero-top">
+              <p class="map-panel__brand">StreetХана</p>
+              <a class="map-panel__hero-link" href="#featurePanel">Посмотреть в Кинопоиск</a>
+            </div>
+
+            <div class="map-panel__hero-body">
+              <h1 class="map-panel__title">Путешествие вкуса по Казахстану</h1>
+
+              <div class="map-panel__hero-actions">
+                <button id="startJourneyButton" class="map-panel__hero-button map-panel__hero-button--primary" type="button">
+                  Начать поездку
+                </button>
+                <a id="watchTrailerButton" class="map-panel__hero-button map-panel__hero-button--secondary" href="#featurePanel">
+                  Смотреть трейлер
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div id="scene-container"></div>
           <div class="map-surface"></div>
 
@@ -174,7 +194,7 @@
           </div>
         </section>
 
-        <section class="feature-panel">
+        <section id="featurePanel" class="feature-panel">
           <video
             class="feature-panel__video"
             src="/media/street-hana-trailer.mp4"

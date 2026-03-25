@@ -3,32 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export function createSceneContext({ container }) {
   const scene = new THREE.Scene();
-
-  const bgCanvas = document.createElement('canvas');
-  bgCanvas.width = 1024;
-  bgCanvas.height = 1024;
-
-  const bgCtx = bgCanvas.getContext('2d');
-  const gradient = bgCtx.createRadialGradient(260, 320, 40, 640, 560, 760);
-
-  gradient.addColorStop(0, '#f1bbb0');
-  gradient.addColorStop(0.3, '#d38d79');
-  gradient.addColorStop(0.72, '#9f5f49');
-  gradient.addColorStop(1, '#5c342d');
-
-  bgCtx.fillStyle = gradient;
-  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-
-  const vignette = bgCtx.createLinearGradient(0, 0, bgCanvas.width, bgCanvas.height);
-  vignette.addColorStop(0, 'rgba(255,255,255,0.02)');
-  vignette.addColorStop(1, 'rgba(28,12,9,0.28)');
-  bgCtx.fillStyle = vignette;
-  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-
-  const bgTexture = new THREE.CanvasTexture(bgCanvas);
-  bgTexture.colorSpace = THREE.SRGBColorSpace;
-
-  scene.background = bgTexture;
+  scene.background = new THREE.Color('#FFDDBB');
 
   const containerWidth = container.clientWidth || window.innerWidth;
   const containerHeight = container.clientHeight || window.innerHeight;
