@@ -680,10 +680,10 @@ body.app-ready #app {
   top: 0;
   left: 0;
   z-index: 6;
-  width: min(calc(338 * var(--width-multiplier)), calc(100% - calc(48 * var(--width-multiplier))));
-  padding: calc(26 * var(--width-multiplier)) calc(58 * var(--width-multiplier)) calc(24 * var(--width-multiplier)) calc(24 * var(--width-multiplier));
-  border-radius: calc(26 * var(--width-multiplier));
-  background: rgba(255, 255, 255, 0.97);
+  width: min(calc(320 * var(--width-multiplier)), calc(100% - calc(48 * var(--width-multiplier))));
+  padding: calc(20 * var(--width-multiplier));
+  border-radius: calc(12 * var(--width-multiplier));
+  background: #FFFFFF;
   box-shadow: var(--card-shadow);
   color: var(--ink);
   transform: translate(-50%, calc(-48 * var(--width-multiplier)));
@@ -720,22 +720,31 @@ body.app-ready #app {
 
 .map-hint__close {
   top: calc(12 * var(--width-multiplier));
-  right: calc(14 * var(--width-multiplier));
+  right: calc(12 * var(--width-multiplier));
   font-size: calc(30 * var(--width-multiplier));
   line-height: 1;
 }
 
+.map-hint__top {
+  display: grid;
+  grid-template-columns: calc(44 * var(--width-multiplier)) 1fr;
+  align-items: center;
+  gap: calc(8 * var(--width-multiplier));
+  margin: 0 0 calc(8 * var(--width-multiplier));
+}
+
 .map-hint__title {
-  margin: 0 0 calc(10 * var(--width-multiplier));
+  margin: 0;
   font-size: calc(16 * var(--width-multiplier));
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
 .map-hint__text {
   margin: 0;
   color: var(--muted);
-  font-size: calc(14 * var(--width-multiplier));
-  line-height: 1.55;
+  font-size: calc(12 * var(--width-multiplier));
+  line-height: 1.25em;
 }
 
 .city-tabs {
