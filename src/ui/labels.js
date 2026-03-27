@@ -41,6 +41,15 @@ export function createLabelsController({
     });
   }
 
+  function updateLabelTexts(cityContent) {
+    cityLabels.forEach((element, key) => {
+      const city = cityContent[key];
+      if (city) {
+        element.textContent = city.title;
+      }
+    });
+  }
+
   function updateLabels() {
     const rect = viewportElement.getBoundingClientRect();
 
@@ -76,5 +85,6 @@ export function createLabelsController({
     setActiveLabel,
     updateLabels,
     updateAvailability,
+    updateLabelTexts,
   };
 }

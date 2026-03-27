@@ -6,12 +6,14 @@ export function createCityTabsController({
   isCityAvailable,
 }) {
   const tabMap = new Map();
+  let currentCityContent = cityContent;
+  let activeCity = null;
 
   function render() {
     root.textContent = '';
 
     routeOrder.forEach((cityKey) => {
-      const city = cityContent[cityKey];
+      const city = currentCityContent[cityKey];
       if (!city) return;
 
       const button = document.createElement('button');
@@ -30,6 +32,7 @@ export function createCityTabsController({
   }
 
   function setActiveCity(cityKey) {
+    activeCity = cityKey;
     tabMap.forEach((button, key) => {
       button.classList.toggle('active', key === cityKey);
     });
@@ -48,5 +51,13 @@ export function createCityTabsController({
   return {
     setActiveCity,
     updateAvailability,
+    updateCityContent(newCityContent) {
+      currentCityContent = newCityContent;
+      render();
+      if (activeCity) {
+        setActiveCity(activeCity);
+      }
+      updateAvailability();
+    },
   };
 }

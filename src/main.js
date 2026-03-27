@@ -1,7 +1,7 @@
 import './style.css';
 import * as THREE from 'three';
 
-import { CITY_CONTENT, ROUTE_ORDER } from './config/cities.js';
+import { ROUTE_ORDER } from './config/cities.js';
 import { createAppState } from './core/state.js';
 import { createSceneContext } from './core/scene.js';
 import { createModalController } from './ui/modal.js';
@@ -10,6 +10,8 @@ import { createCityTabsController } from './ui/cityTabs.js';
 import { createRouteController } from './route/route.js';
 import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
+import { i18n } from './core/i18n.js';
+import { createLanguageSwitcher } from './ui/languageSwitcher.js';
 
 document.body.classList.remove('booting');
 
@@ -42,12 +44,131 @@ const modalImage = document.getElementById('modalImage');
 const modalImageLabel = document.getElementById('modalImageLabel');
 const closeModalButton = document.getElementById('closeModal');
 const closeHintButton = document.getElementById('closeHint');
+const musicToggleButton = document.getElementById('musicToggleButton');
+const bgMusic = document.getElementById('bgMusic');
 const mapHint = document.getElementById('mapHint');
 const preloader = document.getElementById('preloader');
 const preloaderValue = document.getElementById('preloaderValue');
 
+// Van movement sound
+const vanEngineAudio = new Audio('/media/van-engine.mp3');
+vanEngineAudio.loop = true;
+vanEngineAudio.volume = 0.48; // чуть громче
+
+// Background music volume control
+if (bgMusic) {
+  bgMusic.volume = 0.18; // сделаем фон тише
+}
+
 const sceneContext = createSceneContext({ container });
 const state = createAppState();
+const musicElement = bgMusic;
+let isMusicPlaying = false;
+
+function updateMusicButton() {
+  if (!musicToggleButton) return;
+
+  musicToggleButton.textContent = '';
+  musicToggleButton.classList.toggle('playing', isMusicPlaying);
+  musicToggleButton.classList.toggle('muted', !isMusicPlaying);
+
+  musicToggleButton.setAttribute(
+    'aria-label',
+    isMusicPlaying ? i18n.getUiText('musicPause') : i18n.getUiText('musicPlay')
+  );
+}
+
+if (musicToggleButton && musicElement) {
+  musicToggleButton.addEventListener('click', () => {
+    if (isMusicPlaying) {
+      musicElement.pause();
+      isMusicPlaying = false;
+    } else {
+      musicElement.play().catch((error) => {
+        console.warn('Audio playback blocked:', error);
+      });
+      isMusicPlaying = true;
+    }
+
+    updateMusicButton();
+  });
+}
+
+function initializeStaticTexts() {
+  const brandElement = document.querySelector('.map-panel__brand');
+  if (brandElement) {
+    brandElement.textContent = i18n.getUiText('brand');
+  }
+
+  const kinopoiskLink = document.querySelector('.map-panel__hero-link');
+  if (kinopoiskLink) {
+    kinopoiskLink.textContent = i18n.getUiText('kinopoisk');
+  }
+
+  const titleElement = document.querySelector('.map-panel__title');
+  if (titleElement) {
+    titleElement.textContent = i18n.getUiText('title');
+  }
+
+  if (startJourneyButton) {
+    startJourneyButton.textContent = i18n.getUiText('startJourney');
+  }
+
+  if (watchTrailerButton) {
+    watchTrailerButton.textContent = i18n.getUiText('watchTrailer');
+  }
+
+  const mapZoom = document.querySelector('.map-zoom');
+  if (mapZoom) {
+    mapZoom.setAttribute('aria-label', i18n.getUiText('mapZoomControl'));
+  }
+
+  const hintTitle = document.querySelector('.map-hint__title');
+  const hintText = document.querySelector('.map-hint__text');
+  if (hintTitle) {
+    hintTitle.textContent = i18n.getUiText('hintTitle');
+  }
+  if (hintText) {
+    hintText.textContent = i18n.getUiText('hintText');
+  }
+
+  const cityTabs = document.getElementById('cityTabs');
+  if (cityTabs) {
+    cityTabs.setAttribute('aria-label', i18n.getUiText('cityRouteLabel'));
+  }
+
+  if (closePreviewButton) {
+    closePreviewButton.setAttribute('aria-label', i18n.getUiText('closeCard'));
+  }
+  if (closeModalButton) {
+    closeModalButton.setAttribute('aria-label', i18n.getUiText('closeModal'));
+  }
+  if (closeHintButton) {
+    closeHintButton.setAttribute('aria-label', i18n.getUiText('closeHint'));
+  }
+
+  if (musicToggleButton) {
+    updateMusicButton();
+  }
+
+  if (previewButton) {
+    previewButton.textContent = i18n.getUiText('more');
+  }
+
+  if (modalMapLink) {
+    modalMapLink.textContent = i18n.getUiText('openMap');
+  }
+
+  const dishSectionLabel = document.querySelector('.detail-modal__section-label');
+  const placeSectionLabel = document.querySelectorAll('.detail-modal__section-label')[1];
+  if (dishSectionLabel) {
+    dishSectionLabel.textContent = i18n.getUiText('dishSection');
+  }
+  if (placeSectionLabel) {
+    placeSectionLabel.textContent = i18n.getUiText('placeSection');
+  }
+}
+
 const mobileIsoOffset = new THREE.Vector3(-2.9, 4.6, 2.7);
 const desktopOverviewTarget = new THREE.Vector3(0, 0.55, 0);
 const desktopOverviewOffset = new THREE.Vector3(3, 5.45, 4.5);
@@ -162,8 +283,16 @@ function tickPreloader(time) {
   requestAnimationFrame(tickPreloader);
 }
 
+const getCityContent = () => {
+  const content = {};
+  ROUTE_ORDER.forEach(cityKey => {
+    content[cityKey] = i18n.getCityContent(cityKey);
+  });
+  return content;
+};
+
 const modal = createModalController({
-  cityContent: CITY_CONTENT,
+  cityContent: getCityContent(),
   mapPanel,
   previewCard,
   previewImage,
@@ -219,7 +348,7 @@ const labels = createLabelsController({
 const cityTabs = createCityTabsController({
   root: cityTabsRoot,
   routeOrder: ROUTE_ORDER,
-  cityContent: CITY_CONTENT,
+  cityContent: getCityContent(),
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
 });
@@ -457,7 +586,7 @@ function updateMapHintPosition() {
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (state.isMoving) return;
-  if (!CITY_CONTENT[cityKey]) return;
+  if (!i18n.getCityContent(cityKey)) return;
   if (!state.availableCities.has(cityKey)) return;
 
   hideMapHint();
@@ -562,6 +691,18 @@ function animate(time) {
   const delta = state.clock.getDelta();
 
   van.updateVanMovement(delta);
+
+  if (state.isMoving) {
+    if (vanEngineAudio.paused) {
+      vanEngineAudio.play().catch(() => {});
+    }
+  } else {
+    if (!vanEngineAudio.paused) {
+      vanEngineAudio.pause();
+      vanEngineAudio.currentTime = 0;
+    }
+  }
+
   updateMobileFollowCamera(delta);
   sceneContext.camera.lookAt(sceneContext.CAMERA_TARGET);
   labels.updateLabels();
@@ -583,6 +724,30 @@ setActiveView('map');
 updateCameraLayout();
 onResize();
 mapPanel.classList.add('map-panel--hint');
+
+// Initialize static texts
+initializeStaticTexts();
+
+// Create language switcher
+createLanguageSwitcher(mapPanel);
+
+// Subscribe to language changes
+i18n.subscribe(() => {
+  // Update static texts
+  initializeStaticTexts();
+  
+  // Update city content for modal and tabs when language changes
+  const newCityContent = getCityContent();
+  modal.updateCityContent(newCityContent);
+  cityTabs.updateCityContent(newCityContent);
+  labels.updateLabelTexts(newCityContent);
+  
+  // Update any visible content
+  if (state.activeCity) {
+    cityTabs.setActiveCity(state.activeCity);
+  }
+});
+
 requestAnimationFrame(tickPreloader);
 
 loadScene({
@@ -592,7 +757,7 @@ loadScene({
   cityTabs,
   modal,
   van,
-  cityContent: CITY_CONTENT,
+  cityContent: getCityContent(),
   routeOrder: ROUTE_ORDER,
 })
   .then(() => {

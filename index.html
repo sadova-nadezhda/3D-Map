@@ -78,11 +78,6 @@
             </div>
           </div>
 
-          <div class="map-zoom" role="group" aria-label="Управление масштабом карты">
-            <button id="zoomInButton" class="map-zoom__button" type="button" aria-label="Увеличить карту">+</button>
-            <button id="zoomOutButton" class="map-zoom__button" type="button" aria-label="Уменьшить карту">−</button>
-          </div>
-
           <div id="scene-container"></div>
           <div class="map-surface"></div>
 
@@ -109,6 +104,14 @@
           </div>
 
           <div id="cityTabs" class="city-tabs" aria-label="Города маршрута"></div>
+
+          <div class="map-panel__hero-music">
+            <button id="musicToggleButton" class="map-panel__hero-button map-panel__hero-button--secondary" type="button" aria-label="Включить/выключить музыку">
+              Включить музыку
+            </button>
+          </div>
+
+          <audio id="bgMusic" src="/media/bg-music.mp3" loop preload="auto"></audio>
 
           <article id="previewCard" class="preview-card" aria-hidden="true">
             <button

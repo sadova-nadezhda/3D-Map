@@ -122,5 +122,11 @@ export function createModalController({
     hidePreview,
     hideDetail,
     hideAll,
+    updateCityContent(newCityContent) {
+      cityContent = newCityContent;
+      if (activeCityKey && cityContent[activeCityKey]) {
+        fillContent(activeCityKey);
+      }
+    },
   };
 }
