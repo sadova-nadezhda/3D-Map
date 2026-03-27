@@ -18,6 +18,7 @@ document.body.classList.remove('booting');
 const container = document.getElementById('scene-container');
 const experienceShell = document.querySelector('.experience-shell');
 const mapPanel = document.querySelector('.map-panel');
+const mapHeroTop = document.querySelector('.map-panel__hero-top');
 const watchTrailerButton = document.getElementById('watchTrailerButton');
 const featureMapLink = document.querySelector('.feature-panel__map-link');
 const labelsRoot = document.getElementById('labels-root');
@@ -729,7 +730,7 @@ mapPanel.classList.add('map-panel--hint');
 initializeStaticTexts();
 
 // Create language switcher
-createLanguageSwitcher(mapPanel);
+createLanguageSwitcher(mapHeroTop || mapPanel);
 
 // Subscribe to language changes
 i18n.subscribe(() => {

@@ -2,7 +2,7 @@ export const UI_TRANSLATIONS = {
   ru: {
     brand: 'StreetХана',
     kinopoisk: 'Посмотреть в Кинопоиск',
-    title: 'Путешествие вкуса по Казахстану',
+    title: 'Карта казахстанского стритфуда',
     startJourney: 'Начать поездку',
     watchTrailer: 'Смотреть трейлер',
     closeCard: 'Закрыть карточку',
@@ -24,7 +24,7 @@ export const UI_TRANSLATIONS = {
   en: {
     brand: 'StreetHana',
     kinopoisk: 'View on Kinopoisk',
-    title: 'A Taste Journey Across Kazakhstan',
+    title: 'Kazakhstani Street Food Map',
     startJourney: 'Start Journey',
     watchTrailer: 'Watch Trailer',
     closeCard: 'Close Card',
@@ -46,7 +46,7 @@ export const UI_TRANSLATIONS = {
   kk: {
     brand: 'StreetХана',
     kinopoisk: 'Қинопоискте қарау',
-    title: 'Қазақстан бойынша дәмнің сапары',
+    title: 'Қазақстандық стритфуд картасы',
     startJourney: 'Сапарды басту',
     watchTrailer: 'Трейлерді қараңыз',
     closeCard: 'Карточкасын жабу',
