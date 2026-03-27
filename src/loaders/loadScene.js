@@ -18,7 +18,7 @@ export async function loadScene({
   await trySetupEnvironmentLighting({ scene, renderer, state, HDR_PATH });
 
   const [mapGltf, carGltf] = await Promise.all([
-    loader.loadAsync('/models/map.glb'),
+    loader.loadAsync('/models/map-new.glb'),
     loader.loadAsync('/models/car.glb'),
   ]);
 

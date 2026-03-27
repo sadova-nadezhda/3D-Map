@@ -155,11 +155,11 @@ export const CITY_CONTENT = {
 
 export const ROUTE_ORDER = [
   'city_almaty',
-  'city_karaganda',
   'city_astana',
-  'city_aqtobe',
-  'city_atyrau',
-  'city_aqtay',
-  'city_turk',
   'city_shym',
+  'city_kostanay',
+  'city_aqtay',
+  'city_uske',
+  'city_karaganda',
+  'city_aqtobe',
 ];

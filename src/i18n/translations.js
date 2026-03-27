@@ -221,6 +221,44 @@ export const CITY_CONTENT = {
       accent: '#ff5c28',
       mapLink: 'https://yandex.ru/maps/?text=%D0%94%D0%B0%D1%81%D1%82%D0%B0%D1%80%D1%85%D0%B0%D0%BD%20%D0%A8%D1%8B%D0%BC%D0%BA%D0%B5%D0%BD%D1%82',
     },
+    city_kostanay: {
+      title: 'Костанай',
+      venueTitle: 'Кафе "Тобол"',
+      tag: 'Костанай',
+      rating: '4.7',
+      hours: '09:00 - 22:00',
+      previewDescription:
+        'Спокойное место в центре Костаная, где горячая выпечка и мясные блюда особенно хорошо заходят после прогулки по Тоболу.',
+      description:
+        'Небольшое городское кафе, куда заходят за простой и понятной едой без лишнего пафоса. Здесь любят свежую выпечку, наваристые супы и блюда, которые удобно взять с собой.',
+      dishTitle: 'Костанайские пирожки с мясом',
+      dishDescription:
+        'Пирожки делают из тонкого теста с сочной мясной начинкой и подают еще горячими. Это один из самых удобных форматов стритфуда: сытно, быстро и вкусно в дороге.',
+      placeDescription:
+        'Кафе ценят за ровное качество, быстрый сервис и уютную атмосферу без суеты. По вечерам сюда часто заходят за горячей выпечкой и чаем после прогулок по центру города.',
+      imageLabel: 'Пирожки',
+      accent: '#d69054',
+      mapLink: 'https://yandex.ru/maps/?text=%D0%A2%D0%BE%D0%B1%D0%BE%D0%BB%20%D0%9A%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%B0%D0%B9',
+    },
+    city_uske: {
+      title: 'Усть-Каменогорск',
+      venueTitle: 'Бистро "Altai Street"',
+      tag: 'Усть-Каменогорск',
+      rating: '4.8',
+      hours: '10:00 - 23:00',
+      previewDescription:
+        'Городское бистро с восточным акцентом, быстрыми горячими блюдами и ритмом большого индустриального города.',
+      description:
+        'Современное бистро, где привычные восточные блюда подают в удобном городском формате. Сюда приходят за насыщенными вкусами, быстрым обслуживанием и понятным меню.',
+      dishTitle: 'Манты с тыквой и мясом',
+      dishDescription:
+        'Манты готовят на пару, чтобы тесто оставалось мягким, а начинка из мяса и тыквы получалась особенно сочной. Это теплое, сытное блюдо, которое хорошо подходит для прохладной погоды Восточного Казахстана.',
+      placeDescription:
+        'Заведение находится недалеко от центра и работает в ритме большого города: быстро днем и спокойнее по вечерам. Постоянные гости ценят его за аккуратную подачу и стабильный вкус.',
+      imageLabel: 'Манты',
+      accent: '#ff8a5b',
+      mapLink: 'https://yandex.ru/maps/?text=Altai%20Street%20%D0%A3%D1%81%D1%82%D1%8C-%D0%9A%D0%B0%D0%BC%D0%B5%D0%BD%D0%BE%D0%B3%D0%BE%D1%80%D1%81%D0%BA',
+    },
   },
   en: {
     city_almaty: {
@@ -375,6 +413,44 @@ export const CITY_CONTENT = {
       accent: '#ff5c28',
       mapLink: 'https://yandex.ru/maps/?text=%D0%94%D0%B0%D1%81%D1%82%D0%B0%D1%80%D1%85%D0%B0%D0%BD%20%D0%A8%D1%8B%D0%BC%D0%BA%D0%B5%D0%BD%D1%82',
     },
+    city_kostanay: {
+      title: 'Kostanay',
+      venueTitle: 'Cafe "Tobol"',
+      tag: 'Kostanay',
+      rating: '4.7',
+      hours: '09:00 - 22:00',
+      previewDescription:
+        'A calm spot in central Kostanay where hot pastries and hearty meat dishes hit especially well after a walk by the Tobol River.',
+      description:
+        'A compact city cafe where people come for straightforward comfort food without any fuss. Fresh pastries, rich soups, and easy grab-and-go dishes make it a reliable local stop.',
+      dishTitle: 'Kostanay Meat Pies',
+      dishDescription:
+        'These pies are made with thin dough and juicy meat filling, then served piping hot. It is a perfect street-food format: filling, quick, and easy to eat on the move.',
+      placeDescription:
+        'Locals appreciate the cafe for its consistent quality, quick service, and easygoing atmosphere. In the evenings, people often stop by for hot pastries and tea after walking through the city center.',
+      imageLabel: 'Meat Pies',
+      accent: '#d69054',
+      mapLink: 'https://yandex.ru/maps/?text=Tobol%20Kostanay',
+    },
+    city_uske: {
+      title: 'Ust-Kamenogorsk',
+      venueTitle: 'Bistro "Altai Street"',
+      tag: 'Ust-Kamenogorsk',
+      rating: '4.8',
+      hours: '10:00 - 23:00',
+      previewDescription:
+        'A modern city bistro with an Eastern accent, hot comfort dishes, and the pace of a large industrial city.',
+      description:
+        'This contemporary bistro serves familiar Eastern dishes in a convenient urban format. People come here for bold flavors, quick service, and a menu that is easy to navigate.',
+      dishTitle: 'Manti with Pumpkin and Meat',
+      dishDescription:
+        'The manti are steamed so the dough stays tender while the pumpkin-and-meat filling remains juicy. It is a warm, hearty dish that suits the cooler climate of East Kazakhstan especially well.',
+      placeDescription:
+        'Located near the city center, the bistro follows the rhythm of the city: fast at lunch and calmer in the evening. Regulars value it for neat presentation and dependable flavor.',
+      imageLabel: 'Manti',
+      accent: '#ff8a5b',
+      mapLink: 'https://yandex.ru/maps/?text=Altai%20Street%20Ust-Kamenogorsk',
+    },
   },
   kk: {
     city_almaty: {
@@ -528,6 +604,44 @@ export const CITY_CONTENT = {
       imageLabel: 'Шашлық',
       accent: '#ff5c28',
       mapLink: 'https://yandex.ru/maps/?text=%D0%94%D0%B0%D1%81%D1%82%D0%B0%D1%80%D1%85%D0%B0%D0%BD%20%D0%A8%D1%8B%D0%BC%D0%BA%D0%B5%D0%BD%D1%82',
+    },
+    city_kostanay: {
+      title: 'Қостанай',
+      venueTitle: 'Тобыл кафесі',
+      tag: 'Қостанай',
+      rating: '4.7',
+      hours: '09:00 - 22:00',
+      previewDescription:
+        'Қостанай орталығындағы жайлы орын, мұнда ыстық бәліш пен етті тағамдар Тобыл жағасындағы серуеннен кейін ерекше ұнайды.',
+      description:
+        'Бұл шағын кафе қарапайым әрі дәмді асымен танымал. Мұнда жаңа піскен бәліш, қою сорпа және өзіңмен бірге алып кетуге ыңғайлы жылы тағамдар үшін келеді.',
+      dishTitle: 'Ет салынған Қостанай бәліші',
+      dishDescription:
+        'Жұқа қамырлы бәлішті хош иісті ет салмасымен пісіріп, ыстық күйінде ұсынады. Мұндай тағам жол үстінде тез тіскебасар ретінде де, шаймен жайлап ішуге де ыңғайлы.',
+      placeDescription:
+        'Кафені жергілікті тұрғындар тұрақты сапасы, жылдам қызметі және тыныш атмосферасы үшін жақсы көреді. Кешке мұнда ыстық бәліш пен шайға жиі соғады.',
+      imageLabel: 'Бәліш',
+      accent: '#d69054',
+      mapLink: 'https://yandex.ru/maps/?text=%D0%A2%D0%BE%D0%B1%D0%BE%D0%BB%20%D0%9A%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%B0%D0%B9',
+    },
+    city_uske: {
+      title: 'Өскемен',
+      venueTitle: 'Altai Street бистросы',
+      tag: 'Өскемен',
+      rating: '4.8',
+      hours: '10:00 - 23:00',
+      previewDescription:
+        'Өскемендегі заманауи бистро, мұнда буға піскен қамыр тағамдары мен қанық дәмдер үлкен қаланың ырғағымен үйлеседі.',
+      description:
+        'Бұл орын шығыс өңіріне тән дәмдерді заманауи қалалық форматта ұсынады. Қонақтар мұнда манты, ыстық сорпа және тез дайындалатын жайлы тағамдар үшін келеді.',
+      dishTitle: 'Ет пен асқабақ қосылған манты',
+      dishDescription:
+        'Мантыны жұқа қамырмен түйіп, шырынды ет пен асқабақ салмасымен буға пісіреді. Соның арқасында дәмі жұмсақ, хош иісі қанық әрі суық күнге өте жайлы болады.',
+      placeDescription:
+        'Бистро орталыққа жақын орналасқан және түскі асқа да, кешкі кездесуге де ыңғайлы. Тұрақты қонақтар бұл жерді ұқыпты сервисі мен тұрақты дәмі үшін бағалайды.',
+      imageLabel: 'Манты',
+      accent: '#ff8a5b',
+      mapLink: 'https://yandex.ru/maps/?text=Altai%20Street%20%D0%A3%D1%81%D1%82%D1%8C-%D0%9A%D0%B0%D0%BC%D0%B5%D0%BD%D0%BE%D0%B3%D0%BE%D1%80%D1%81%D0%BA',
     },
   },
 };
