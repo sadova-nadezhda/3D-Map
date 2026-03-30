@@ -12,6 +12,10 @@ import { createVanController } from './van/van.js';
 import { loadScene } from './loaders/loadScene.js';
 import { i18n } from './core/i18n.js';
 import { createLanguageSwitcher } from './ui/languageSwitcher.js';
+import { createIntroModalController } from './ui/introModal.js';
+
+// Temporarily disabled in favor of the intro modal. Easy to switch back later.
+const MAP_HINT_ENABLED = false;
 
 document.body.classList.remove('booting');
 
@@ -44,12 +48,17 @@ const modalMapLink = document.getElementById('modalMapLink');
 const modalImage = document.getElementById('modalImage');
 const modalImageLabel = document.getElementById('modalImageLabel');
 const closeModalButton = document.getElementById('closeModal');
-const closeHintButton = document.getElementById('closeHint');
+const closeHintButton = MAP_HINT_ENABLED ? document.getElementById('closeHint') : null;
 const musicToggleButton = document.getElementById('musicToggleButton');
 const bgMusic = document.getElementById('bgMusic');
-const mapHint = document.getElementById('mapHint');
+const mapHint = MAP_HINT_ENABLED ? document.getElementById('mapHint') : null;
 const preloader = document.getElementById('preloader');
 const preloaderValue = document.getElementById('preloaderValue');
+const introOverlay = document.getElementById('introOverlay');
+const introExploreButton = document.getElementById('introExploreButton');
+const introTitle = document.getElementById('introTitle');
+const introDescription = document.getElementById('introDescription');
+const introHeroImage = document.getElementById('introHeroImage');
 
 // Van movement sound
 const vanEngineAudio = new Audio('/media/van-engine.mp3');
@@ -95,6 +104,16 @@ if (musicToggleButton && musicElement) {
   });
 }
 
+function updateJourneyButtonLabel() {
+  if (!startJourneyButton) {
+    return;
+  }
+
+  startJourneyButton.textContent = i18n.getUiText(
+    hasJourneyStarted ? 'continueJourney' : 'startJourney'
+  );
+}
+
 function initializeStaticTexts() {
   const brandElement = document.querySelector('.map-panel__brand');
   if (brandElement) {
@@ -111,9 +130,7 @@ function initializeStaticTexts() {
     titleElement.textContent = i18n.getUiText('title');
   }
 
-  if (startJourneyButton) {
-    startJourneyButton.textContent = i18n.getUiText('startJourney');
-  }
+  updateJourneyButtonLabel();
 
   if (watchTrailerButton) {
     watchTrailerButton.textContent = i18n.getUiText('watchTrailer');
@@ -124,13 +141,15 @@ function initializeStaticTexts() {
     mapZoom.setAttribute('aria-label', i18n.getUiText('mapZoomControl'));
   }
 
-  const hintTitle = document.querySelector('.map-hint__title');
-  const hintText = document.querySelector('.map-hint__text');
-  if (hintTitle) {
-    hintTitle.textContent = i18n.getUiText('hintTitle');
-  }
-  if (hintText) {
-    hintText.textContent = i18n.getUiText('hintText');
+  if (MAP_HINT_ENABLED) {
+    const hintTitle = document.querySelector('.map-hint__title');
+    const hintText = document.querySelector('.map-hint__text');
+    if (hintTitle) {
+      hintTitle.textContent = i18n.getUiText('hintTitle');
+    }
+    if (hintText) {
+      hintText.textContent = i18n.getUiText('hintText');
+    }
   }
 
   const cityTabs = document.getElementById('cityTabs');
@@ -200,6 +219,18 @@ let isPreloaderLaunching = false;
 let preloaderProgress = 0;
 let preloaderTarget = 0;
 let preloaderLastTime = 0;
+let hasIntroShown = false;
+let introModal = null;
+let hasJourneyStarted = false;
+
+function markJourneyStarted() {
+  if (hasJourneyStarted) {
+    return;
+  }
+
+  hasJourneyStarted = true;
+  updateJourneyButtonLabel();
+}
 
 function setActiveView(view) {
   if (!experienceShell) {
@@ -227,6 +258,10 @@ function finishPreloader() {
   document.body.classList.add('app-ready');
   preloader.classList.add('is-hidden');
   startSceneAnimation();
+  if (introModal && !hasIntroShown) {
+    hasIntroShown = true;
+    introModal.show();
+  }
 
   window.setTimeout(() => {
     preloader.setAttribute('hidden', 'true');
@@ -328,6 +363,28 @@ const modal = createModalController({
     cityTabs.updateAvailability();
   },
 });
+
+if (
+  introOverlay &&
+  introExploreButton &&
+  introTitle &&
+  introDescription
+) {
+  introModal = createIntroModalController({
+    overlay: introOverlay,
+    mapPanel,
+    actionButton: introExploreButton,
+    titleElement: introTitle,
+    descriptionElement: introDescription,
+    heroImage: introHeroImage,
+    onAction: openJourneyStart,
+  });
+
+  if (document.body.classList.contains('app-ready') && !hasIntroShown) {
+    hasIntroShown = true;
+    introModal.show();
+  }
+}
 
 let selectCity = () => {};
 
@@ -548,11 +605,20 @@ function stopMapPointerInteraction(event) {
 }
 
 function hideMapHint() {
+  if (!MAP_HINT_ENABLED || !mapHint) {
+    mapPanel?.classList.remove('map-panel--hint');
+    return;
+  }
+
   mapHint.classList.add('hidden');
   mapPanel.classList.remove('map-panel--hint');
 }
 
 function updateMapHintPosition() {
+  if (!MAP_HINT_ENABLED || !mapHint) {
+    return;
+  }
+
   if (mapHint.classList.contains('hidden')) {
     return;
   }
@@ -563,26 +629,47 @@ function updateMapHintPosition() {
   }
 
   const containerRect = container.getBoundingClientRect();
+  const panelRect = mapPanel.getBoundingClientRect();
+  const sceneOffsetX = containerRect.left - panelRect.left;
+  const sceneOffsetY = containerRect.top - panelRect.top;
   const hintWidth = Math.min(338, containerRect.width - 32);
   const hintHeight = mapHint.offsetHeight || 140;
   const margin = 16;
+  const hintGap = window.innerWidth <= 768 ? 12 : 20;
 
   almatyScreenPosition.copy(almatyPoint).project(sceneContext.camera);
 
-  const anchorX = ((almatyScreenPosition.x + 1) / 2) * containerRect.width;
-  const anchorY = ((1 - almatyScreenPosition.y) / 2) * containerRect.height;
+  const anchorX = sceneOffsetX + ((almatyScreenPosition.x + 1) / 2) * containerRect.width;
+  const anchorY = sceneOffsetY + ((1 - almatyScreenPosition.y) / 2) * containerRect.height;
 
   const left = Math.min(
     Math.max(anchorX, margin + hintWidth / 2),
-    containerRect.width - margin - hintWidth / 2
+    panelRect.width - margin - hintWidth / 2
   );
   const top = Math.min(
-    Math.max(anchorY - hintHeight - 28, margin),
-    containerRect.height - hintHeight - margin
+    Math.max(anchorY - hintHeight - hintGap, sceneOffsetY + margin),
+    panelRect.height - hintHeight - margin
   );
 
   mapHint.style.left = `${left}px`;
   mapHint.style.top = `${top}px`;
+}
+
+function getJourneyTargetCityKey() {
+  const nextJourneyCity = ROUTE_ORDER.find(
+    (cityKey) => state.availableCities.has(cityKey) && !state.completedCities.has(cityKey)
+  );
+
+  if (nextJourneyCity) {
+    return nextJourneyCity;
+  }
+
+  if (state.activeCity) {
+    return state.activeCity;
+  }
+
+  const firstAvailableCity = ROUTE_ORDER.find((cityKey) => state.availableCities.has(cityKey));
+  return firstAvailableCity || ROUTE_ORDER[0] || null;
 }
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
@@ -590,6 +677,7 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (!i18n.getCityContent(cityKey)) return;
   if (!state.availableCities.has(cityKey)) return;
 
+  markJourneyStarted();
   hideMapHint();
 
   const sameCity = state.activeCity === cityKey;
@@ -628,12 +716,50 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 }
 
 function openJourneyStart() {
-  const currentCity = state.activeCity || ROUTE_ORDER[0];
+  const targetCityKey = getJourneyTargetCityKey();
 
-  if (!currentCity) return;
+  if (!targetCityKey || state.isMoving) return;
 
+  setActiveView('map');
+  introModal?.hide();
   hideMapHint();
-  selectCity(currentCity);
+
+  const isTargetCurrent = state.activeCity === targetCityKey;
+  const hasPreviewOpen = previewCard?.classList.contains('active');
+  const hasDetailOpen = detailOverlay?.classList.contains('active');
+
+  if (!hasJourneyStarted) {
+    markJourneyStarted();
+
+    if (isTargetCurrent) {
+      modal.showPreview(targetCityKey);
+      return;
+    }
+
+    selectCity(targetCityKey);
+    return;
+  }
+
+  if (!isTargetCurrent) {
+    modal.hideAll();
+    selectCity(targetCityKey);
+    return;
+  }
+
+  if (isTargetCurrent && !hasPreviewOpen && !hasDetailOpen) {
+    modal.showPreview(targetCityKey);
+    return;
+  }
+
+  if (isTargetCurrent && hasPreviewOpen && !hasDetailOpen) {
+    modal.showDetail(targetCityKey);
+    return;
+  }
+
+  if (isTargetCurrent && hasDetailOpen) {
+    modal.hideDetail();
+    modal.showPreview(targetCityKey);
+  }
 }
 
 startJourneyButton?.addEventListener('click', openJourneyStart);
@@ -711,7 +837,7 @@ function animate(time) {
   sceneContext.renderer.render(sceneContext.scene, sceneContext.camera);
 }
 
-closeHintButton.addEventListener('click', hideMapHint);
+closeHintButton?.addEventListener('click', hideMapHint);
 
 sceneContext.renderer.domElement.addEventListener('wheel', onMapWheel, { passive: false });
 sceneContext.renderer.domElement.addEventListener('pointerdown', onMapPointerDown);
@@ -724,7 +850,7 @@ window.addEventListener('resize', onResize);
 setActiveView('map');
 updateCameraLayout();
 onResize();
-mapPanel.classList.add('map-panel--hint');
+// mapPanel.classList.add('map-panel--hint');
 
 // Initialize static texts
 initializeStaticTexts();
@@ -736,6 +862,7 @@ createLanguageSwitcher(mapHeroTop || mapPanel);
 i18n.subscribe(() => {
   // Update static texts
   initializeStaticTexts();
+  introModal?.updateCopy();
   
   // Update city content for modal and tabs when language changes
   const newCityContent = getCityContent();

@@ -59,8 +59,18 @@
       <main class="experience-shell">
         <section id="mapPanelSection" class="map-panel">
           <div class="map-panel__hero">
-            <div class="map-panel__hero-top">
-              <p class="map-panel__brand">StreetХана</p>
+            <div class="map-panel__hero-top map-panel__topbar">
+              <a id="watchTrailerButton" class="map-panel__hero-button map-panel__hero-button--secondary" href="#featurePanel">
+                Смотреть трейлер
+              </a>
+              <div class="map-panel__logos">
+                <a class="map-panel__logo" href="https://www.kinopoisk.ru/" target="_blank" rel="noopener noreferrer">
+                  <img class="kp" src="/media/KP_logo.svg" alt="Кинопоиск" />
+                </a>
+                <a class="map-panel__logo" rel="noopener noreferrer">
+                  <img class="sh" src="/media/SH_logo.svg" alt="Street Хана" />
+                </a>
+              </div>
             </div>
 
             <div class="map-panel__hero-body">
@@ -70,47 +80,66 @@
                 <button id="startJourneyButton" class="map-panel__hero-button map-panel__hero-button--primary" type="button">
                   Начать поездку
                 </button>
-                <a id="watchTrailerButton" class="map-panel__hero-button map-panel__hero-button--secondary" href="#featurePanel">
-                  Смотреть трейлер
-                </a>
               </div>
             </div>
           </div>
 
-          <div id="scene-container"></div>
-          <div class="map-surface"></div>
-
-          <div id="labels-root" aria-hidden="true"></div>
-
-          <div id="mapHint" class="map-hint">
-            <button
-              id="closeHint"
-              class="map-hint__close"
-              type="button"
-              aria-label="Закрыть подсказку"
-            >
-              ×
-            </button>
-            <div class="map-hint__top">
-              <div class="map-hint__img">
-                <img src="/media/book.png" alt="">
+          <div class="scene-wrap">
+            <div id="scene-container"></div>
+            <div class="map-surface"></div>
+            <div id="labels-root" aria-hidden="true"></div>
+            <!-- Map hint temporarily disabled in favor of the intro modal.
+            <div id="mapHint" class="map-hint">
+              <button
+                id="closeHint"
+                class="map-hint__close"
+                type="button"
+                aria-label="Закрыть подсказку"
+              >
+                ×
+              </button>
+              <div class="map-hint__top">
+                <div class="map-hint__img">
+                  <img src="/media/book.png" alt="">
+                </div>
+                <p class="map-hint__title">Путь начинается здесь!</p>
               </div>
-              <p class="map-hint__title">Путь начинается здесь!</p>
+              <p class="map-hint__text">
+                Следуйте по маршруту и нажимайте на города, чтобы открывать новые места и истории.
+              </p>
             </div>
-            <p class="map-hint__text">
-              Следуйте по маршруту и нажимайте на города, чтобы открывать новые места и истории.
-            </p>
+            -->
+            <div id="cityTabs" class="city-tabs" aria-label="Города маршрута"></div>
+            <div class="map-panel__hero-music">
+              <button id="musicToggleButton" class="map-panel__hero-button map-panel__hero-button--secondary" type="button" aria-label="Включить/выключить музыку">
+                Включить музыку
+              </button>
+            </div>
+            <audio id="bgMusic" src="/media/bg-music.mp3" loop preload="auto"></audio>
           </div>
 
-          <div id="cityTabs" class="city-tabs" aria-label="Города маршрута"></div>
+          <div id="introOverlay" class="intro-overlay" aria-hidden="true">
+            <article class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+              <div class="intro-modal__hero" aria-hidden="true">
+                <img
+                  id="introHeroImage"
+                  class="intro-modal__hero-image"
+                  src="/media/shaursak-ru.png"
+                  alt=""
+                />
+              </div>
 
-          <div class="map-panel__hero-music">
-            <button id="musicToggleButton" class="map-panel__hero-button map-panel__hero-button--secondary" type="button" aria-label="Включить/выключить музыку">
-              Включить музыку
-            </button>
+              <div class="intro-modal__body">
+                <h2 id="introTitle" class="intro-modal__title">Как выглядит Казахстан на вкус?</h2>
+                <p id="introDescription" class="intro-modal__text">
+                  К выходу сериала «STREETХАНА» мы собрали карту стритфуда — с блюдами, которые любят в разных городах Казахстана, и точками, где их можно найти.
+                </p>
+                <button id="introExploreButton" class="intro-modal__button" type="button">
+                  Исследовать!
+                </button>
+              </div>
+            </article>
           </div>
-
-          <audio id="bgMusic" src="/media/bg-music.mp3" loop preload="auto"></audio>
 
           <article id="previewCard" class="preview-card" aria-hidden="true">
             <button

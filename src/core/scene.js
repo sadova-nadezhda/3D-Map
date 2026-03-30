@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export function createSceneContext({ container }) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#FFDDBB');
+  // scene.background = new THREE.Color('#FFDDBB');
 
   const containerWidth = container.clientWidth || window.innerWidth;
   const containerHeight = container.clientHeight || window.innerHeight;
@@ -21,7 +21,7 @@ export function createSceneContext({ container }) {
 
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
-    alpha: false,
+    alpha: true,
   });
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
