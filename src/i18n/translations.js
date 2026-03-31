@@ -552,9 +552,9 @@ export const CITY_CONTENT = {
       mapLink: 'https://yandex.ru/maps/?text=%D0%96%D0%B0%D0%B9%D1%8B%D0%BA%20%D0%90%D1%82%D1%8B%D1%80%D0%B0%D1%83',
     },
     city_aqtay: {
-      title: 'Актау',
+      title: 'Ақтау',
       venueTitle: 'Кәфе "Caspian Table"',
-      tag: 'Актау',
+      tag: 'Ақтау',
       rating: '4.7',
       hours: '09:00 - 23:00',
       previewDescription:

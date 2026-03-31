@@ -63,11 +63,11 @@ const introHeroImage = document.getElementById('introHeroImage');
 // Van movement sound
 const vanEngineAudio = new Audio('/media/van-engine.mp3');
 vanEngineAudio.loop = true;
-vanEngineAudio.volume = 0.48; // чуть громче
+vanEngineAudio.volume = 0.25; // уменьшена громкость
 
 // Background music volume control
 if (bgMusic) {
-  bgMusic.volume = 0.18; // сделаем фон тише
+  bgMusic.volume = 0.1; // уменьшена громкость фона
 }
 
 const sceneContext = createSceneContext({ container });
@@ -819,7 +819,7 @@ function animate(time) {
 
   van.updateVanMovement(delta);
 
-  if (state.isMoving) {
+  if (state.isMoving && isMusicPlaying) {
     if (vanEngineAudio.paused) {
       vanEngineAudio.play().catch(() => {});
     }
