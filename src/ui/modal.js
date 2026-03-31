@@ -19,8 +19,8 @@ export function createModalController({
   modalDishDescription,
   modalPlaceDescription,
   modalMapLink,
+  modalMapContainer,
   modalImage,
-  modalImageLabel,
   onPreviewShown = () => {},
 }) {
   let activeCityKey = null;
@@ -49,11 +49,33 @@ export function createModalController({
     modalDishTitle.textContent = city.dishTitle;
     modalDishDescription.textContent = city.dishDescription;
     modalPlaceDescription.textContent = city.placeDescription;
-    modalMapLink.href = city.mapLink;
-    modalImageLabel.textContent = city.imageLabel;
+    
+    // Handle map display: either embed iframe or show link with marker
+    if (city.mapEmbed) {
+      modalMapContainer.innerHTML = city.mapEmbed;
+      modalMapLink.style.display = 'none';
+    } else {
+      modalMapContainer.innerHTML = '';
+      modalMapLink.href = city.mapLink;
+    }
 
     previewImage.style.setProperty('--city-accent', city.accent);
     modalImage.style.setProperty('--city-accent', city.accent);
+    
+    // Set image from array
+    if (city.image) {
+      const img = document.createElement('img');
+      img.src = city.image;
+      img.alt = city.dishTitle;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.objectPosition = 'center';
+      modalImage.innerHTML = '';
+      modalImage.appendChild(img);
+    } else {
+      modalImage.innerHTML = '';
+    }
 
     activeCityKey = cityKey;
     return city;

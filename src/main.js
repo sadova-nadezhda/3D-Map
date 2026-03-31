@@ -46,7 +46,6 @@ const modalDishDescription = document.getElementById('modalDishDescription');
 const modalPlaceDescription = document.getElementById('modalPlaceDescription');
 const modalMapLink = document.getElementById('modalMapLink');
 const modalImage = document.getElementById('modalImage');
-const modalImageLabel = document.getElementById('modalImageLabel');
 const closeModalButton = document.getElementById('closeModal');
 const closeHintButton = MAP_HINT_ENABLED ? document.getElementById('closeHint') : null;
 const musicToggleButton = document.getElementById('musicToggleButton');
@@ -348,8 +347,8 @@ const modal = createModalController({
   modalDishDescription,
   modalPlaceDescription,
   modalMapLink,
+  modalMapContainer,
   modalImage,
-  modalImageLabel,
   onPreviewShown: (cityKey) => {
     const currentIndex = ROUTE_ORDER.indexOf(cityKey);
     const nextCity = ROUTE_ORDER[currentIndex + 1];

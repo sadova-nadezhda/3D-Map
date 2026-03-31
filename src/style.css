@@ -936,47 +936,15 @@ body.app-ready #app {
   --city-accent: #ff7b2f;
   position: relative;
   overflow: hidden;
-  border-radius: calc(18 * var(--width-multiplier));
-  background:
-    radial-gradient(circle at 72% 20%, rgba(255, 255, 255, 0.34), transparent 26%),
-    radial-gradient(circle at 26% 38%, rgba(0, 0, 0, 0.22), transparent 40%),
-    linear-gradient(135deg, #30180b 0%, var(--city-accent) 38%, #ffd5a9 68%, #8b491c 100%);
+  border-radius: calc(12 * var(--width-multiplier));
+  background-size: cover;
+  background-position: center;
+  background-color: var(--city-accent);
 }
 
 .preview-card__image {
   height: calc(160 * var(--width-multiplier));
   margin-bottom: calc(16 * var(--width-multiplier));
-}
-
-.preview-card__image::before,
-.preview-card__image::after,
-.detail-modal__image::before,
-.detail-modal__image::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-}
-
-.preview-card__image::before,
-.detail-modal__image::before {
-  left: calc(-34 * var(--width-multiplier));
-  bottom: calc(-46 * var(--width-multiplier));
-  width: calc(226 * var(--width-multiplier));
-  height: calc(226 * var(--width-multiplier));
-  background: radial-gradient(circle, #f9dfb4 0%, #e29d51 66%, rgba(129, 62, 23, 0.94) 100%);
-  box-shadow:
-    calc(94 * var(--width-multiplier)) calc(-22 * var(--width-multiplier)) 0 calc(-52 * var(--width-multiplier)) rgba(255, 220, 170, 0.95),
-    calc(176 * var(--width-multiplier)) calc(12 * var(--width-multiplier)) 0 calc(-62 * var(--width-multiplier)) rgba(128, 59, 24, 0.58),
-    calc(42 * var(--width-multiplier)) calc(44 * var(--width-multiplier)) 0 calc(-56 * var(--width-multiplier)) rgba(247, 186, 119, 0.82);
-}
-
-.preview-card__image::after,
-.detail-modal__image::after {
-  right: calc(18 * var(--width-multiplier));
-  top: calc(14 * var(--width-multiplier));
-  width: calc(120 * var(--width-multiplier));
-  height: calc(120 * var(--width-multiplier));
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04) 70%);
 }
 
 .preview-card__tag,
@@ -1097,35 +1065,6 @@ body.app-ready #app {
   height: calc(300 * var(--width-multiplier));
 }
 
-.detail-modal__image-glow {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 48%;
-  background: linear-gradient(180deg, transparent, rgba(61, 25, 9, 0.28));
-}
-
-.detail-modal__image-plate {
-  position: absolute;
-  right: calc(24 * var(--width-multiplier));
-  bottom: calc(22 * var(--width-multiplier));
-  width: calc(138 * var(--width-multiplier));
-  height: calc(138 * var(--width-multiplier));
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 248, 238, 0.9), rgba(255, 240, 220, 0.24) 62%, transparent 70%);
-}
-
-.detail-modal__image-label {
-  position: absolute;
-  left: calc(16 * var(--width-multiplier));
-  bottom: calc(16 * var(--width-multiplier));
-  padding: calc(8 * var(--width-multiplier)) calc(12 * var(--width-multiplier));
-  border-radius: calc(100 * var(--width-multiplier));
-  background: rgba(19, 11, 8, 0.42);
-  color: #fff;
-  font-size: calc(14 * var(--width-multiplier));
-  font-weight: 700;
-}
-
 .detail-modal__map-card {
   position: relative;
   display: flex;
@@ -1143,29 +1082,6 @@ body.app-ready #app {
     linear-gradient(rgba(114, 162, 219, 0.32) calc(1 * var(--width-multiplier)), transparent calc(1 * var(--width-multiplier))),
     linear-gradient(180deg, #edf3ff 0%, #f2f6e9 100%);
   background-size: calc(34 * var(--width-multiplier)) calc(34 * var(--width-multiplier)), calc(34 * var(--width-multiplier)) calc(34 * var(--width-multiplier)), 100% 100%;
-}
-
-.detail-modal__map-preview::before,
-.detail-modal__map-preview::after {
-  content: "";
-  position: absolute;
-  background: rgba(114, 145, 180, 0.6);
-}
-
-.detail-modal__map-preview::before {
-  top: calc(34 * var(--width-multiplier));
-  left: calc(-24 * var(--width-multiplier));
-  width: 120%;
-  height: calc(4 * var(--width-multiplier));
-  transform: rotate(18deg);
-}
-
-.detail-modal__map-preview::after {
-  top: calc(160 * var(--width-multiplier));
-  left: calc(-12 * var(--width-multiplier));
-  width: 116%;
-  height: calc(4 * var(--width-multiplier));
-  transform: rotate(-16deg);
 }
 
 .detail-modal__map-button {

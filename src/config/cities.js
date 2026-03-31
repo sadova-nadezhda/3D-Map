@@ -15,6 +15,7 @@ export const CITY_CONTENT = {
     placeDescription:
       'Семейное заведение существует с 1992 года. Мастер-повар Абдулла готовит самсу каждое утро по рецепту своего деда. Местные ценят это место за аутентичность, щедрые порции и домашнюю атмосферу.',
     imageLabel: 'Самса и чай',
+    image: '/media/samsa.png',
     accent: '#ff6a00',
     mapLink: 'https://yandex.ru/maps/?text=Navat%20Almaty',
   },
