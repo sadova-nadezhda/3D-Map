@@ -27,7 +27,6 @@ const watchTrailerButton = document.getElementById('watchTrailerButton');
 const featureMapLink = document.querySelector('.feature-panel__map-link');
 const labelsRoot = document.getElementById('labels-root');
 const cityTabsRoot = document.getElementById('cityTabs');
-const startJourneyButton = document.getElementById('startJourneyButton');
 const previewCard = document.getElementById('previewCard');
 const previewImage = document.getElementById('previewImage');
 const previewTag = document.getElementById('previewTag');
@@ -129,8 +128,6 @@ function initializeStaticTexts() {
     titleElement.textContent = i18n.getUiText('title');
   }
 
-  updateJourneyButtonLabel();
-
   if (watchTrailerButton) {
     watchTrailerButton.textContent = i18n.getUiText('watchTrailer');
   }
@@ -228,7 +225,6 @@ function markJourneyStarted() {
   }
 
   hasJourneyStarted = true;
-  updateJourneyButtonLabel();
 }
 
 function setActiveView(view) {
@@ -761,7 +757,6 @@ function openJourneyStart() {
   }
 }
 
-startJourneyButton?.addEventListener('click', openJourneyStart);
 watchTrailerButton?.addEventListener('click', (event) => {
   event.preventDefault();
   setActiveView('feature');
