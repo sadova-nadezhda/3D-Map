@@ -32,8 +32,8 @@
         opacity: 1;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-C48Kkkw5.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-IRLPByiE.css">
+    <script type="module" crossorigin src="/assets/index-DHRmhlRf.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DH6jXWQI.css">
   </head>
   <body class="booting">
     <div id="preloader" class="preloader" aria-live="polite">
@@ -227,26 +227,32 @@
             />
 
             <div class="feature-panel__bottom">
-              <p class="feature-panel__story">
+              <p id="featureStory" class="feature-panel__story">
                 Тениз мечтает стать шеф-поваром, но поражение в конкурсе меняет его планы. Добрая
                 комедия о дружбе и любви.
               </p>
 
-              <div class="feature-panel__actions">
-                <a class="feature-panel__button feature-panel__button--primary" href="https://hd.kinopoisk.ru/ru-kz/film/d6157c3920534f50be97fb9f3a7884bb?from_block=kp-button-suggest" target="_blank" rel="noopener noreferrer">
+              <a
+                id="featureActionLink"
+                class="feature-panel__actions"
+                href="https://hd.kinopoisk.ru/ru-kz/film/d6157c3920534f50be97fb9f3a7884bb?from_block=kp-button-suggest"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Смотреть на КиноПоиск"
+              >
+                <span id="featureActionLabel" class="feature-panel__button feature-panel__button--primary">
                   Смотреть на КиноПоиск
-                </a>
-                <button
+                </span>
+                <span
                   class="feature-panel__button feature-panel__button--icon"
-                  type="button"
-                  aria-label="Открыть трейлер"
+                  aria-hidden="true"
                 >
                   <img src="/media/btn-ico.svg" alt="" aria-hidden="true" />
-                </button>
-              </div>
+                </span>
+              </a>
             </div>
 
-            <a class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
+            <a id="featureMapLink" class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M15 6.5L9 4L3 6.5V18L9 15.5L15 18L21 15.5V4L15 6.5Z"
@@ -261,7 +267,7 @@
                   stroke-linecap="round"
                 />
               </svg>
-              <span>К карте</span>
+              <span id="featureMapLabel">К карте</span>
             </a>
           </div>
         </section>

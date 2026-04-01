@@ -683,14 +683,14 @@ body.app-ready #app {
   background-image: url('/media/yes.svg');
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 60%;
+  background-size: 50%;
 }
 
 .map-panel__hero-music .map-panel__hero-button.muted {
   background-image: url('/media/no.svg');
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 60%;
+  background-size: 50%;
 }
 
 .map-panel__hero-button {
@@ -749,11 +749,11 @@ body.app-ready #app {
   transform: translate(-50%, -50%);
   border: 0;
   border-radius: calc(999 * var(--width-multiplier));
-  padding: calc(8 * var(--width-multiplier)) calc(12 * var(--width-multiplier));
+  padding: calc(8 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
   background: rgba(255, 249, 244, 0.92);
   color: #4f332c;
-  font-size: calc(12 * var(--width-multiplier));
-  font-weight: 700;
+  font-size: calc(14 * var(--width-multiplier));
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 calc(10 * var(--width-multiplier)) calc(24 * var(--width-multiplier)) rgba(80, 35, 22, 0.14);
@@ -1227,6 +1227,7 @@ body.app-ready #app {
   display: flex;
   align-items: stretch;
   gap: calc(6 * var(--width-multiplier));
+  text-decoration: none;
   transition: transform 0.24s ease;
 }
 
@@ -1529,7 +1530,7 @@ body.app-ready #app {
   .feature-panel__media {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     gap: calc(16 * var(--width-multiplier));
     padding: calc(80 * var(--width-multiplier)) calc(16 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
@@ -1634,11 +1635,7 @@ body.app-ready #app {
 }
 
 #scene-container {
-  background: #f6eadc url('/media/back_ru.png') center center / cover no-repeat;
-}
-
-html[data-language="kz"] #scene-container {
-  background-image: url('/media/back_kz.png');
+  background: #f6eadc url('/media/map-new.webp') center center / cover no-repeat;
 }
 
 #scene-container,
@@ -1797,13 +1794,13 @@ html[data-language="kz"] #scene-container {
     bottom: calc(80 * var(--width-multiplier));
   }
 
-  .map-panel__hero-music .map-panel__hero-button.playing {
+  /* .map-panel__hero-music .map-panel__hero-button.playing {
     background-size: 50%;
   }
 
   .map-panel__hero-music .map-panel__hero-button.muted {
     background-size: 50%;
-  }
+  } */
 }
 
 @media (max-width: 767px) {

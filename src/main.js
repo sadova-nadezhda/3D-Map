@@ -25,6 +25,10 @@ const mapPanel = document.querySelector('.map-panel');
 const mapHeroTop = document.querySelector('.map-panel__hero-top');
 const watchTrailerButton = document.getElementById('watchTrailerButton');
 const featureMapLink = document.querySelector('.feature-panel__map-link');
+const featureStory = document.getElementById('featureStory');
+const featureActionLink = document.getElementById('featureActionLink');
+const featureActionLabel = document.getElementById('featureActionLabel');
+const featureMapLabel = document.getElementById('featureMapLabel');
 const labelsRoot = document.getElementById('labels-root');
 const cityTabsRoot = document.getElementById('cityTabs');
 const previewCard = document.getElementById('previewCard');
@@ -132,6 +136,18 @@ function initializeStaticTexts() {
     watchTrailerButton.textContent = i18n.getUiText('watchTrailer');
   }
 
+  if (featureStory) {
+    featureStory.textContent = i18n.getUiText('featureStory');
+  }
+
+  if (featureActionLabel) {
+    featureActionLabel.textContent = i18n.getUiText('featureAction');
+  }
+
+  if (featureActionLink) {
+    featureActionLink.setAttribute('aria-label', i18n.getUiText('featureAction'));
+  }
+
   const mapZoom = document.querySelector('.map-zoom');
   if (mapZoom) {
     mapZoom.setAttribute('aria-label', i18n.getUiText('mapZoomControl'));
@@ -173,6 +189,14 @@ function initializeStaticTexts() {
 
   if (modalMapLink) {
     modalMapLink.textContent = i18n.getUiText('openMap');
+  }
+
+  if (featureMapLabel) {
+    featureMapLabel.textContent = i18n.getUiText('featureMap');
+  }
+
+  if (featureMapLink) {
+    featureMapLink.setAttribute('aria-label', i18n.getUiText('featureMap'));
   }
 }
 
@@ -753,6 +777,13 @@ watchTrailerButton?.addEventListener('click', (event) => {
 featureMapLink?.addEventListener('click', (event) => {
   event.preventDefault();
   setActiveView('map');
+
+  requestAnimationFrame(() => {
+    mapPanel?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  });
 });
 
 function onMapClick(event) {
