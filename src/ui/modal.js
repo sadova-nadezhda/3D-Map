@@ -102,10 +102,6 @@ export function createModalController({
       const img = document.createElement('img');
       img.src = imageSrc;
       img.alt = city.imageLabel || city.venueTitle || city.title;
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'contain';
-      img.style.objectPosition = 'center';
       modalImage.innerHTML = '';
       modalImage.appendChild(img);
     } else {

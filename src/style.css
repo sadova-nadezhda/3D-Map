@@ -1085,7 +1085,12 @@ body.app-ready #app {
 
 .detail-modal__image {
   height: calc(300 * var(--width-multiplier));
-  margin: calc(-12 * var(--width-multiplier)) calc(-18 * var(--width-multiplier));
+}
+
+.detail-modal__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .detail-modal__map-card {

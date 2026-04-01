@@ -631,6 +631,10 @@ function updateMapHintPosition() {
 }
 
 function getJourneyTargetCityKey() {
+  if (!hasJourneyStarted && state.activeCity) {
+    return state.activeCity;
+  }
+
   const nextJourneyCity = ROUTE_ORDER.find(
     (cityKey) => state.availableCities.has(cityKey) && !state.completedCities.has(cityKey)
   );

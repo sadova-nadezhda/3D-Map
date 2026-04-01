@@ -18,7 +18,7 @@ export async function loadScene({
   await trySetupEnvironmentLighting({ scene, renderer, state, HDR_PATH });
 
   const [mapGltf, carGltf] = await Promise.all([
-    loader.loadAsync('/models/map-new.glb'),
+    loader.loadAsync('/models/map-2.glb'),
     loader.loadAsync('/models/car.glb'),
   ]);
 
@@ -123,10 +123,15 @@ export async function loadScene({
 
   const firstCityKey = routeOrder[0];
 
+  routeOrder.forEach((cityKey) => {
+    if (state.cityPositions.has(cityKey)) {
+      state.availableCities.add(cityKey);
+    }
+  });
+
   if (firstCityKey && state.cityPositions.has(firstCityKey)) {
     const firstPosition = state.cityPositions.get(firstCityKey).clone();
 
-    state.availableCities.add(firstCityKey);
     state.completedCities.add(firstCityKey);
 
     state.activeRouteY = firstPosition.y + state.ROUTE_Y_OFFSET;
