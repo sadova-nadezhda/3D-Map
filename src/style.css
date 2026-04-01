@@ -940,29 +940,21 @@ body.app-ready #app {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  /* background-color: var(--city-accent); */
+  background-color: var(--city-accent);
 }
 
-.preview-card__image::before,
+/* .preview-card__image::before,
 .detail-modal__image::before {
   --city-accent: #ff7b2f;
   content: '';
   position: absolute;
-  bottom: calc(18 * var(--width-multiplier));
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
   width: 100%;
   height: 100%;
   border-radius: calc(12 * var(--width-multiplier));
   background-color: var(--city-accent);
   z-index: -1;
-}
-
-.detail-modal__image::before {
-  width: calc(100% - calc(36 * var(--width-multiplier)));
-  height: calc(100% - calc(24 * var(--width-multiplier)));
-}
-
+} */
 
 .preview-card__image {
   height: calc(160 * var(--width-multiplier));
@@ -1887,9 +1879,17 @@ html[data-language="kz"] #scene-container {
     margin-top: calc(24 * var(--width-multiplier));
     margin-bottom: calc(16 * var(--width-multiplier));
     color: #ffffff;
-    font-size: calc(32 * var(--width-multiplier));
+    font-size: calc(22 * var(--width-multiplier));
     line-height: 1;
     letter-spacing: -0.05em;
+  }
+
+  .map-panel__subtitle {
+    order: 4;
+    margin-top: 0;
+    margin-bottom: calc(16 * var(--width-multiplier));
+    color: #ffffff;
+    font-size: calc(12 * var(--width-multiplier));
   }
 
   #startJourneyButton {

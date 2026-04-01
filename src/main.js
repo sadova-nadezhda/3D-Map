@@ -123,6 +123,11 @@ function initializeStaticTexts() {
     titleElement.textContent = i18n.getUiText('title');
   }
 
+  const subtitleElement = document.querySelector('.map-panel__subtitle');
+  if (subtitleElement) {
+    subtitleElement.textContent = i18n.getUiText('subtitle');
+  }
+
   if (watchTrailerButton) {
     watchTrailerButton.textContent = i18n.getUiText('watchTrailer');
   }
