@@ -72,22 +72,23 @@ export async function loadScene({
     if (!name.startsWith('city_')) return;
 
     const key = name;
+    if (!routeOrder.includes(key)) return;
+
+    const city = cityContent[key];
+    if (!city) return;
+
     const position = new THREE.Vector3();
     child.getWorldPosition(position);
 
     state.cityPositions.set(key, position);
     state.cityPoints.push({ key, position });
-
-    const city = cityContent[key];
-    if (city) {
-      labels.createLabel(key, city.title);
-      createInvisibleMarker({
-        scene,
-        state,
-        cityKey: key,
-        position,
-      });
-    }
+    labels.createLabel(key, city.title);
+    createInvisibleMarker({
+      scene,
+      state,
+      cityKey: key,
+      position,
+    });
   });
 
   const carModel =

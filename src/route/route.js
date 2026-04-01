@@ -245,27 +245,9 @@ export function createRouteController({ scene, state }) {
     routeY,
     clampPointToMap,
   }) {
-    // Здесь перечислены пары городов, для которых маршрут задается вручную.
+    // ?????????? ?????????????????????? ???????? ??????????????, ?????? ?????????????? ?????????????? ???????????????? ??????????????.
     if (isRoutePair(fromCityKey, toCityKey, 'city_aqtay', 'city_shym')) {
-      return createAktauTurkestanCurve({
-        start,
-        end,
-        routeY,
-        clampPointToMap,
-      });
-    }
-
-    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_aqtay')) {
-      return createAtyrauAktauCurve({
-        start,
-        end,
-        routeY,
-        clampPointToMap,
-      });
-    }
-
-    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_shym')) {
-      return createAtyrauTurkestanCurve({
+      return createAktauShymkentCurve({
         start,
         end,
         routeY,
@@ -281,7 +263,7 @@ export function createRouteController({ scene, state }) {
     return pair === [cityA, cityB].sort().join('->');
   }
 
-  function createAktauTurkestanCurve({ start, end, routeY, clampPointToMap }) {
+  function createAktauShymkentCurve({ start, end, routeY, clampPointToMap }) {
     // Тестовый midpoint. Пока смещение 0, линия идет почти ровно.
     // Меняй первое число в new THREE.Vector3(x, 0, z):
     //  0.1 -> дуга вправо
@@ -297,59 +279,6 @@ export function createRouteController({ scene, state }) {
       // Меньше значение -> ближе к прямым сегментам.
       // Больше значение -> дуга плавнее и свободнее.
       0.2
-    );
-  }
-
-  function createAtyrauAktauCurve({ start, end }) {
-    // Тестовый midpoint. Пока смещение 0, поэтому линия остается ровной.
-    const point1 = start.clone().lerp(end, 0.5).add(new THREE.Vector3(0.3, 0, 0));
-
-    return new THREE.CatmullRomCurve3(
-      [start, point1, end],
-      false,
-      'centripetal',
-      0.2
-    );
-  }
-
-  function createAtyrauTurkestanCurve({ start, end, routeY, clampPointToMap }) {
-    // Здесь логика такая же, как выше:
-    // lerp задает место точки на маршруте,
-    // add(Vector3(x, 0, z)) задает смещение этой точки.
-    const aqtobe = state.cityPositions.get('city_aqtobe');
-
-    if (!aqtobe) {
-      return null;
-    }
-
-    const point1 = clampPointToMap(
-      start
-        .clone()
-        .lerp(aqtobe, 0.42)
-        .add(new THREE.Vector3(0.12, 0, -0.04))
-    );
-    const point2 = clampPointToMap(
-      aqtobe
-        .clone()
-        .lerp(end, 0.34)
-        .add(new THREE.Vector3(0.22, 0, -0.04))
-    );
-    const point3 = clampPointToMap(
-      start
-        .clone()
-        .lerp(end, 0.8)
-        .add(new THREE.Vector3(0.18, 0, -0.08))
-    );
-
-    point1.y = routeY;
-    point2.y = routeY;
-    point3.y = routeY;
-
-    return new THREE.CatmullRomCurve3(
-      [start, point1, point2, point3, end],
-      false,
-      'centripetal',
-      0.7
     );
   }
 

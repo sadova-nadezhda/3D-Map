@@ -48,11 +48,11 @@
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: var(--city-accent);
+  /* background-color: var(--city-accent); */
 }
 
 .preview-card__image {
-  height: calc(160 * var(--width-multiplier));
+  height: calc(270 * var(--width-multiplier));
   margin-bottom: calc(16 * var(--width-multiplier));
 }
 
@@ -256,6 +256,34 @@
   line-height: 1.5em;
 }
 
-.detail-modal__lead p {
+.detail-modal__section {
+  display: grid;
+  gap: calc(16 * var(--width-multiplier));
+}
+
+.detail-modal__section--divided {
+  padding-top: calc(22 * var(--width-multiplier));
+  border-top: calc(1 * var(--width-multiplier)) solid rgba(16, 24, 40, 0.12);
+}
+
+.detail-modal__section-title {
   margin: 0;
+  color: #1e2939;
+  font-size: calc(20 * var(--width-multiplier));
+  font-weight: 500;
+  line-height: 1.4em;
+  letter-spacing: -0.02em;
+}
+
+.detail-modal__section-copy {
+  display: grid;
+  gap: calc(16 * var(--width-multiplier));
+}
+
+.detail-modal__paragraph {
+  margin: 0;
+}
+
+.detail-modal__paragraph--emphasis {
+  font-weight: 500;
 }

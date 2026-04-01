@@ -1,3 +1,5 @@
+import { i18n } from '../core/i18n.js';
+
 const CITY_MAP_EMBEDS = {
   city_almaty:
     '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A24efcd186f45037f85fe5fc9476a71615db02ecb0c5b9e7b6bb9bea3520c774e&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
@@ -28,6 +30,34 @@ const CITY_IMAGES = {
   city_aqtobe: '/media/Донер 2.png',
 };
 
+const CITY_IMAGES_BY_LANGUAGE = {
+  ru: {
+    city_almaty: '/media/Лагман_ру.webp',
+    city_astana: '/media/Бургер_ру.webp',
+    city_shym: '/media/Шашлык_ру.webp',
+    city_kostanay: '/media/Беляши_ру.webp',
+    city_aqtay: '/media/Фишбармак_ру.webp',
+    city_uske: '/media/Иск кебаб_ру.webp',
+    city_karaganda: '/media/Рамен_ру.webp',
+    city_aqtobe: '/media/Донер_ру.webp',
+  },
+  kz: {
+    city_almaty: '/media/Лагман_кз.webp',
+    city_astana: '/media/Бургер_кз.webp',
+    city_shym: '/media/Шашлык_кз.webp',
+    city_kostanay: '/media/Беляши_кз.webp',
+    city_aqtay: '/media/Фишбармак_кз.webp',
+    city_uske: '/media/Иск кебаб_кз.webp',
+    city_karaganda: '/media/Рамен_кз.webp',
+    city_aqtobe: '/media/Донер_кз.webp',
+  },
+};
+
+function resolveCityImage(cityKey) {
+  const language = i18n.getLanguage();
+  return CITY_IMAGES_BY_LANGUAGE[language]?.[cityKey] || CITY_IMAGES[cityKey] || null;
+}
+
 export function createModalController({
   cityContent,
   mapPanel,
@@ -49,18 +79,87 @@ export function createModalController({
 }) {
   let activeCityKey = null;
 
+  function getParagraphs(texts) {
+    return texts
+      .filter(Boolean)
+      .flatMap((text) =>
+        text
+          .split(/\n\s*\n/)
+          .map((paragraphText) => paragraphText.trim())
+          .filter(Boolean),
+      );
+  }
+
+  function appendParagraphs(container, texts, emphasisMode = 'none') {
+    const paragraphs = getParagraphs(texts);
+
+    paragraphs.forEach((paragraphText, index) => {
+      const paragraph = document.createElement('p');
+      paragraph.className = 'detail-modal__paragraph';
+
+      if (emphasisMode === 'all' || (emphasisMode === 'last' && index === paragraphs.length - 1)) {
+        paragraph.classList.add('detail-modal__paragraph--emphasis');
+      }
+
+      paragraph.textContent = paragraphText;
+      container.appendChild(paragraph);
+    });
+  }
+
+  function appendDescriptionSection({ title, texts, divided = false, emphasisMode = 'none' }) {
+    const filteredTexts = texts.filter(Boolean);
+    if (filteredTexts.length === 0) return null;
+
+    const section = document.createElement('section');
+    section.className = `detail-modal__section${divided ? ' detail-modal__section--divided' : ''}`;
+
+    if (title) {
+      const sectionTitle = document.createElement('h3');
+      sectionTitle.className = 'detail-modal__section-title';
+      sectionTitle.textContent = title;
+      section.appendChild(sectionTitle);
+    }
+
+    const sectionBody = document.createElement('div');
+    sectionBody.className = 'detail-modal__section-copy';
+    appendParagraphs(sectionBody, filteredTexts, emphasisMode);
+    section.appendChild(sectionBody);
+
+    modalDescription.appendChild(section);
+    return sectionBody;
+  }
+
   function renderModalDescription(city) {
     if (!modalDescription) return;
 
-    const descriptionParts = [city.description, city.dishDescription, city.placeDescription].filter(Boolean);
-
     modalDescription.innerHTML = '';
+    const emphasizedSection = city.emphasizedSection || 'place';
+    const emphasisMode = city.emphasisMode || 'all';
 
-    descriptionParts.forEach((text) => {
-      const paragraph = document.createElement('p');
-      paragraph.textContent = text;
-      modalDescription.appendChild(paragraph);
+    appendDescriptionSection({
+      texts: [city.description],
     });
+
+    const sectionCopy = appendDescriptionSection({
+      title: city.dishTitle || i18n.getUiText('dishSection'),
+      texts: [city.dishDescription, city.placeDescription],
+      divided: true,
+      emphasisMode: emphasizedSection === 'dish' ? emphasisMode : 'none',
+    });
+
+    if (!sectionCopy) return;
+
+    sectionCopy.innerHTML = '';
+    appendParagraphs(
+      sectionCopy,
+      [city.dishDescription],
+      emphasizedSection === 'dish' ? emphasisMode : 'none',
+    );
+    appendParagraphs(
+      sectionCopy,
+      [city.placeDescription],
+      emphasizedSection === 'place' ? emphasisMode : 'none',
+    );
   }
 
   function syncPanelOverlay() {
@@ -75,7 +174,7 @@ export function createModalController({
     const city = cityContent[cityKey];
     if (!city) return null;
     const mapEmbed = city.mapEmbed || CITY_MAP_EMBEDS[cityKey];
-    const imageSrc = city.image || CITY_IMAGES[cityKey];
+    const imageSrc = city.image || resolveCityImage(cityKey);
 
     previewTag.textContent = city.tag;
     previewTitle.textContent = city.venueTitle;
