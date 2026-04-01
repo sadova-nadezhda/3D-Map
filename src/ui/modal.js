@@ -1,3 +1,33 @@
+const CITY_MAP_EMBEDS = {
+  city_almaty:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A24efcd186f45037f85fe5fc9476a71615db02ecb0c5b9e7b6bb9bea3520c774e&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_astana:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A60c0ea94e9d3fe10ee432877398e6cfa34d28b399802567c7f36037850bd7625&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_shym:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3Ad824f526d9386ce1766f821d3f553d644a0435298dfe28582e25f62e44e3e492&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_kostanay:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A1bc7df7dd78b7c06af23d69d12f814ed0754be8de0d8064547079cbbd2acc828&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_aqtay:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A3cd8f61abe6e0128462e7e372e5bafc08357e5e232ce3bfbe6f64cc5fcad18d0&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_uske:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3Ab790d75fd4b1a649940737af8bcfc8f8032669e79b88ebdda84bb846b1b4c08e&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_karaganda:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A3160682c8db82602a7891d3406680a2189ff32c029591dc4f8b643752ba07cb4&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+  city_aqtobe:
+    '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3Abfc592bd7ca1ab0e48eedb318bc6cb4ee12ee055c2f47bd2752a6b99b9e4f939&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
+};
+
+const CITY_IMAGES = {
+  city_almaty: '/media/Лагман 2.png',
+  city_astana: '/media/Бургер 2.png',
+  city_shym: '/media/Шашлык 2.png',
+  city_kostanay: '/media/Беляши 2.png',
+  city_aqtay: '/media/Фишбармак 2.png',
+  city_uske: '/media/Искандер-Кебаб 2.png',
+  city_karaganda: '/media/Рамен 2.png',
+  city_aqtobe: '/media/Донер 2.png',
+};
+
 export function createModalController({
   cityContent,
   mapPanel,
@@ -12,18 +42,26 @@ export function createModalController({
   modalTitle,
   modalDescription,
   closeModalButton,
-  modalCityTag,
-  modalRating,
-  modalHours,
-  modalDishTitle,
-  modalDishDescription,
-  modalPlaceDescription,
   modalMapLink,
   modalMapContainer,
   modalImage,
   onPreviewShown = () => {},
 }) {
   let activeCityKey = null;
+
+  function renderModalDescription(city) {
+    if (!modalDescription) return;
+
+    const descriptionParts = [city.description, city.dishDescription, city.placeDescription].filter(Boolean);
+
+    modalDescription.innerHTML = '';
+
+    descriptionParts.forEach((text) => {
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      modalDescription.appendChild(paragraph);
+    });
+  }
 
   function syncPanelOverlay() {
     const hasPreview = previewCard.classList.contains('active');
@@ -36,40 +74,37 @@ export function createModalController({
   function fillContent(cityKey) {
     const city = cityContent[cityKey];
     if (!city) return null;
+    const mapEmbed = city.mapEmbed || CITY_MAP_EMBEDS[cityKey];
+    const imageSrc = city.image || CITY_IMAGES[cityKey];
 
     previewTag.textContent = city.tag;
     previewTitle.textContent = city.venueTitle;
     previewDescription.textContent = city.previewDescription || city.description;
+    previewImage.style.backgroundImage = imageSrc ? `url("${imageSrc}")` : 'none';
 
     modalTitle.textContent = city.venueTitle;
-    modalDescription.textContent = city.description;
-    modalCityTag.textContent = city.tag;
-    modalRating.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.68323 1.53058C7.71245 1.47155 7.75758 1.42187 7.81353 1.38713C7.86949 1.35239 7.93404 1.33398 7.9999 1.33398C8.06576 1.33398 8.13031 1.35239 8.18626 1.38713C8.24222 1.42187 8.28735 1.47155 8.31656 1.53058L9.85656 4.64991C9.95802 4.85523 10.1078 5.03285 10.293 5.16755C10.4782 5.30225 10.6933 5.38999 10.9199 5.42325L14.3639 5.92725C14.4292 5.9367 14.4905 5.96423 14.5409 6.00671C14.5913 6.0492 14.6289 6.10495 14.6492 6.16765C14.6696 6.23036 14.6721 6.29752 14.6563 6.36154C14.6405 6.42556 14.6071 6.48388 14.5599 6.52991L12.0692 8.95525C11.905 9.11531 11.7821 9.3129 11.7111 9.531C11.6402 9.7491 11.6233 9.98117 11.6619 10.2072L12.2499 13.6339C12.2614 13.6991 12.2544 13.7663 12.2296 13.8277C12.2048 13.8891 12.1632 13.9423 12.1096 13.9812C12.056 14.0202 11.9926 14.0432 11.9265 14.0478C11.8604 14.0524 11.7944 14.0384 11.7359 14.0072L8.65723 12.3886C8.45438 12.2821 8.22868 12.2264 7.99956 12.2264C7.77044 12.2264 7.54475 12.2821 7.3419 12.3886L4.2639 14.0072C4.20545 14.0382 4.1395 14.0521 4.07353 14.0474C4.00757 14.0427 3.94424 14.0196 3.89076 13.9807C3.83728 13.9418 3.79579 13.8887 3.771 13.8274C3.74622 13.7661 3.73914 13.699 3.75056 13.6339L4.3379 10.2079C4.3767 9.98174 4.35989 9.74951 4.28892 9.53128C4.21796 9.31304 4.09497 9.11535 3.93056 8.95525L1.4399 6.53058C1.39229 6.4846 1.35856 6.42618 1.34254 6.36196C1.32652 6.29775 1.32886 6.23033 1.34928 6.16737C1.36971 6.10442 1.40741 6.04847 1.45808 6.0059C1.50876 5.96333 1.57037 5.93585 1.6359 5.92658L5.07923 5.42325C5.30607 5.39025 5.52149 5.30262 5.70695 5.1679C5.89242 5.03319 6.04237 4.85543 6.1439 4.64991L7.68323 1.53058Z" fill="#FF9500" stroke="#FF9500" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/></svg> ${city.rating}`;
-    modalHours.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_556_4695)"><path d="M7.99967 14.6673C11.6816 14.6673 14.6663 11.6825 14.6663 8.00065C14.6663 4.31875 11.6816 1.33398 7.99967 1.33398C4.31778 1.33398 1.33301 4.31875 1.33301 8.00065C1.33301 11.6825 4.31778 14.6673 7.99967 14.6673Z" stroke="#364153" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 4V8L10.6667 9.33333" stroke="#364153" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_556_4695"><rect width="16" height="16" fill="white"/></clipPath></defs></svg> ${city.hours}`;
-    modalDishTitle.textContent = city.dishTitle;
-    modalDishDescription.textContent = city.dishDescription;
-    modalPlaceDescription.textContent = city.placeDescription;
+    renderModalDescription(city);
     
     // Handle map display: either embed iframe or show link with marker
-    if (city.mapEmbed) {
-      modalMapContainer.innerHTML = city.mapEmbed;
+    if (mapEmbed) {
+      modalMapContainer.innerHTML = mapEmbed;
       modalMapLink.style.display = 'none';
     } else {
-      modalMapContainer.innerHTML = '';
+      modalMapContainer.innerHTML = '<div class="detail-modal__map-marker"></div>';
       modalMapLink.href = city.mapLink;
+      modalMapLink.style.display = '';
     }
 
     previewImage.style.setProperty('--city-accent', city.accent);
     modalImage.style.setProperty('--city-accent', city.accent);
     
-    // Set image from array
-    if (city.image) {
+    if (imageSrc) {
       const img = document.createElement('img');
-      img.src = city.image;
-      img.alt = city.dishTitle;
+      img.src = imageSrc;
+      img.alt = city.imageLabel || city.venueTitle || city.title;
       img.style.width = '100%';
       img.style.height = '100%';
-      img.style.objectFit = 'cover';
+      img.style.objectFit = 'contain';
       img.style.objectPosition = 'center';
       modalImage.innerHTML = '';
       modalImage.appendChild(img);

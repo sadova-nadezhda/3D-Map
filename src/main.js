@@ -37,13 +37,8 @@ const closePreviewButton = document.getElementById('closePreview');
 const detailOverlay = document.getElementById('detailOverlay');
 const modalTitle = document.getElementById('modalTitle');
 const modalDescription = document.getElementById('modalDescription');
-const modalCityTag = document.getElementById('modalCityTag');
-const modalRating = document.getElementById('modalRating');
-const modalHours = document.getElementById('modalHours');
-const modalDishTitle = document.getElementById('modalDishTitle');
-const modalDishDescription = document.getElementById('modalDishDescription');
-const modalPlaceDescription = document.getElementById('modalPlaceDescription');
 const modalMapLink = document.getElementById('modalMapLink');
+const modalMapContainer = document.getElementById('modalMapContainer');
 const modalImage = document.getElementById('modalImage');
 const closeModalButton = document.getElementById('closeModal');
 const closeHintButton = MAP_HINT_ENABLED ? document.getElementById('closeHint') : null;
@@ -173,15 +168,6 @@ function initializeStaticTexts() {
 
   if (modalMapLink) {
     modalMapLink.textContent = i18n.getUiText('openMap');
-  }
-
-  const dishSectionLabel = document.querySelector('.detail-modal__section-label');
-  const placeSectionLabel = document.querySelectorAll('.detail-modal__section-label')[1];
-  if (dishSectionLabel) {
-    dishSectionLabel.textContent = i18n.getUiText('dishSection');
-  }
-  if (placeSectionLabel) {
-    placeSectionLabel.textContent = i18n.getUiText('placeSection');
   }
 }
 
@@ -336,12 +322,6 @@ const modal = createModalController({
   modalTitle,
   modalDescription,
   closeModalButton,
-  modalCityTag,
-  modalRating,
-  modalHours,
-  modalDishTitle,
-  modalDishDescription,
-  modalPlaceDescription,
   modalMapLink,
   modalMapContainer,
   modalImage,
