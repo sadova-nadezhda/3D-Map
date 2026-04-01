@@ -1,4 +1,9 @@
-import './style.css';
+import './styles/base.css';
+import './styles/map.css';
+import './styles/modal.css';
+import './styles/feature.css';
+import './styles/intro.css';
+import './styles/responsive.css';
 import * as THREE from 'three';
 
 import { ROUTE_ORDER } from './config/cities.js';
