@@ -433,7 +433,6 @@ body.app-ready #app {
   }
 
   .preloader__track {
-    /* height: min(calc((100vw - calc(24 * var(--width-multiplier))) * 1.12), calc(100vh - calc(24 * var(--width-multiplier)))); */
     min-height: calc(360 * var(--width-multiplier));
   }
 
@@ -489,6 +488,7 @@ body.app-ready #app {
   transform: translate3d(0, var(--feature-shift), 0);
 }
 
+/* Panels */
 .map-panel,
 .feature-panel {
   position: relative;
@@ -498,9 +498,10 @@ body.app-ready #app {
   height: var(--panel-height);
 }
 
-/* .map-panel {
-  background: linear-gradient(135deg, #a86554 0%, #9f624f 40%, #67392d 100%);
-} */
+.map-panel {
+  border: 0;
+  background: transparent;
+}
 
 .feature-panel {
   border-radius: calc(20 * var(--width-multiplier));
@@ -532,6 +533,7 @@ body.app-ready #app {
 
 #scene-container {
   border-radius: calc(20 * var(--width-multiplier));
+  background: #f6eadc url('/media/map-new.webp') center center / cover no-repeat;
 }
 
 #scene-container,
@@ -539,6 +541,7 @@ body.app-ready #app {
 .map-surface {
   position: absolute;
   inset: 0;
+  top: calc(68 * var(--width-multiplier));
 }
 
 #scene-container canvas {
@@ -554,27 +557,32 @@ body.app-ready #app {
 
 .map-surface {
   pointer-events: none;
+  opacity: 0.34;
   background:
-    radial-gradient(circle at 22% 68%, rgba(255, 230, 223, 0.4), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(46, 12, 6, 0.12));
+    radial-gradient(circle at 24% 24%, rgba(255, 255, 255, 0.72), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(92, 53, 37, 0.12));
 }
 
 .map-panel__hero {
   position: absolute;
-  inset: calc(16 * var(--width-multiplier)) calc(16 * var(--width-multiplier)) auto;
+  inset: 0;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: calc(18 * var(--width-multiplier));
+  gap: 0;
   pointer-events: none;
 }
 
-.map-panel__hero-top {
+.map-panel__topbar {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: calc(16 * var(--width-multiplier));
+  gap: calc(24 * var(--width-multiplier));
+  flex-wrap: nowrap;
+  padding-bottom: calc(24 * var(--width-multiplier));
+  pointer-events: auto;
 }
 
 .map-panel__logos {
@@ -607,59 +615,27 @@ body.app-ready #app {
   object-fit: contain;
 }
 
-.map-panel__brand,
-.map-panel__eyebrow,
 .map-panel__title,
-.map-panel__description {
+.map-panel__subtitle {
   margin: 0;
 }
 
-.map-panel__brand {
-  color: rgba(31, 31, 31, 0.95);
-  font-size: calc(22 * var(--width-multiplier));
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.map-panel__hero-link,
 .map-panel__hero-button {
   pointer-events: auto;
-}
-
-.map-panel__hero-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(40 * var(--width-multiplier));
-  padding: calc(8 * var(--width-multiplier)) calc(20 * var(--width-multiplier));
-  border-radius: calc(100 * var(--width-multiplier));
-  background: rgba(31, 31, 31, 0.95);
-  color: rgba(255, 255, 255, 1);
-  font-size: calc(14 * var(--width-multiplier));
-  font-weight: 600;
-  transition:
-    transform 0.24s ease,
-    background 0.24s ease,
-    box-shadow 0.24s ease;
-}
-
-.map-panel__hero-link:hover {
-  background: rgba(17, 17, 17, 0.96);
-  transform: translateY(calc(-2 * var(--width-multiplier)));
-  box-shadow: 0 calc(16 * var(--width-multiplier)) calc(30 * var(--width-multiplier)) rgba(21, 9, 5, 0.26);
 }
 
 .map-panel__hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: calc(18 * var(--width-multiplier));
-  margin-top: calc(24 * var(--width-multiplier));
+  align-items: center;
+  gap: calc(12 * var(--width-multiplier));
+  margin-top: calc(22 * var(--width-multiplier));
 }
 
 .map-panel__hero-music {
   position: absolute;
-  right: calc(16 * var(--width-multiplier));
-  bottom: calc(16 * var(--width-multiplier));
+  right: calc(20 * var(--width-multiplier));
+  bottom: calc(18 * var(--width-multiplier));
   top: auto;
   transform: translateY(calc(2 * var(--width-multiplier)));
   z-index: 7;
@@ -671,7 +647,8 @@ body.app-ready #app {
   height: calc(48 * var(--width-multiplier));
   padding: 0;
   border-radius: 50%;
-  background-color: rgba(31, 31, 31, 0.85);
+  background-color: rgba(22, 22, 22, 0.88);
+  box-shadow: 0 calc(14 * var(--width-multiplier)) calc(28 * var(--width-multiplier)) rgba(26, 18, 16, 0.14);
   color: #fff;
   font-size: 0;
   display: inline-flex;
@@ -732,10 +709,6 @@ body.app-ready #app {
 .map-panel__hero-button--secondary:hover {
   background: rgba(20, 18, 17, 0.98);
   box-shadow: 0 calc(18 * var(--width-multiplier)) calc(32 * var(--width-multiplier)) rgba(21, 9, 5, 0.24);
-}
-
-.map-zoom {
-  display: none;
 }
 
 #labels-root {
@@ -942,19 +915,6 @@ body.app-ready #app {
   background-repeat: no-repeat;
   background-color: var(--city-accent);
 }
-
-/* .preview-card__image::before,
-.detail-modal__image::before {
-  --city-accent: #ff7b2f;
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: calc(12 * var(--width-multiplier));
-  background-color: var(--city-accent);
-  z-index: -1;
-} */
 
 .preview-card__image {
   height: calc(160 * var(--width-multiplier));
@@ -1387,31 +1347,6 @@ body.app-ready #app {
     border-radius: calc(16 * var(--width-multiplier));
   }
 
-  .map-panel__hero {
-    inset: calc(10 * var(--width-multiplier)) calc(10 * var(--width-multiplier)) auto;
-    gap: calc(10 * var(--width-multiplier));
-  }
-
-  .map-panel__hero-top {
-    gap: calc(8 * var(--width-multiplier));
-    padding-bottom: calc(10 * var(--width-multiplier));
-  }
-
-  .map-panel__brand {
-    font-size: calc(18 * var(--width-multiplier));
-  }
-
-  .map-panel__hero-link {
-    min-height: calc(38 * var(--width-multiplier));
-    padding: 0 calc(14 * var(--width-multiplier));
-    font-size: calc(12 * var(--width-multiplier));
-  }
-
-  .map-panel__hero-actions {
-    gap: calc(8 * var(--width-multiplier));
-    margin-top: calc(16 * var(--width-multiplier));
-  }
-
   .map-panel__hero-button {
     min-height: calc(42 * var(--width-multiplier));
     padding: 0 calc(16 * var(--width-multiplier));
@@ -1572,7 +1507,6 @@ body.app-ready #app {
     right: calc(16 * var(--width-multiplier));
     top: calc(16 * var(--width-multiplier));
     bottom: auto;
-    /* bottom: calc(84 * var(--width-multiplier)); */
     min-height: calc(42 * var(--width-multiplier));
     padding: 0 calc(14 * var(--width-multiplier));
     gap: calc(8 * var(--width-multiplier));
@@ -1628,58 +1562,7 @@ body.app-ready #app {
   box-shadow: 0 calc(8 * var(--width-multiplier)) calc(18 * var(--width-multiplier)) rgba(255, 90, 20, 0.28);
 }
 
-/* Map Intro Refresh */
-.map-panel {
-  border: 0;
-  background: transparent;
-}
-
-#scene-container {
-  background: #f6eadc url('/media/map-new.webp') center center / cover no-repeat;
-}
-
-#scene-container,
-#labels-root,
-.map-surface {
-  top: calc(68 * var(--width-multiplier));
-}
-
-.map-surface {
-  opacity: 0.34;
-  background:
-    radial-gradient(circle at 24% 24%, rgba(255, 255, 255, 0.72), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(92, 53, 37, 0.12));
-}
-
-.map-panel__hero {
-  inset: 0;
-  gap: 0;
-}
-
-.map-panel__topbar {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: calc(24 * var(--width-multiplier));
-  flex-wrap: nowrap;
-  padding-bottom: calc(24 * var(--width-multiplier));
-  pointer-events: auto;
-}
-
-.map-panel__brand {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
+/* Map intro content */
 .map-panel__hero-body {
   display: flex;
   flex-direction: column;
@@ -1706,32 +1589,6 @@ body.app-ready #app {
   letter-spacing: -0.02em;
 }
 
-.map-panel__hero-actions {
-  position: static;
-  gap: calc(12 * var(--width-multiplier));
-  margin-top: calc(22 * var(--width-multiplier));
-}
-
-#startJourneyButton {
-  padding: calc(10 * var(--width-multiplier)) calc(24 * var(--width-multiplier));
-  border-radius: calc(100 * var(--width-multiplier));
-  box-shadow: 0 calc(18 * var(--width-multiplier)) calc(36 * var(--width-multiplier)) rgba(255, 102, 35, 0.22);
-}
-
-/* #watchTrailerButton {
-  min-height: auto;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-  box-shadow: none;
-  font-size: calc(14 * var(--width-multiplier));
-  font-weight: 600;
-  line-height: 1.8em;
-  letter-spacing: -0.01em;
-  transition: color 0.3s ease-out;
-} */
-
 #watchTrailerButton::before {
   content: "";
   width: 0;
@@ -1741,16 +1598,6 @@ body.app-ready #app {
   border-bottom: calc(6 * var(--width-multiplier)) solid transparent;
   border-left: calc(8 * var(--width-multiplier)) solid rgba(255, 255, 255, 1);
   transition: border-left-color 0.3s ease-out;
-}
-
-.map-panel__hero-music {
-  right: calc(20 * var(--width-multiplier));
-  bottom: calc(18 * var(--width-multiplier));
-}
-
-.map-panel__hero-music .map-panel__hero-button {
-  background-color: rgba(22, 22, 22, 0.88);
-  box-shadow: 0 calc(14 * var(--width-multiplier)) calc(28 * var(--width-multiplier)) rgba(26, 18, 16, 0.14);
 }
 
 @media (max-width: 1024px) {
@@ -1770,11 +1617,6 @@ body.app-ready #app {
     padding: calc(18 * var(--width-multiplier)) calc(18 * var(--width-multiplier)) 0;
   }
 
-  #watchTrailerButton {
-    top: calc(20 * var(--width-multiplier));
-    left: calc(18 * var(--width-multiplier));
-  }
-
   .city-tabs {
     left: calc(18 * var(--width-multiplier));
     right: calc(78 * var(--width-multiplier));
@@ -1788,19 +1630,10 @@ body.app-ready #app {
 }
 
 @media (max-width: 767px) {
-
   .map-panel__hero-music {
     right: calc(12 * var(--width-multiplier));
     bottom: calc(80 * var(--width-multiplier));
   }
-
-  /* .map-panel__hero-music .map-panel__hero-button.playing {
-    background-size: 50%;
-  }
-
-  .map-panel__hero-music .map-panel__hero-button.muted {
-    background-size: 50%;
-  } */
 }
 
 @media (max-width: 767px) {
@@ -1889,13 +1722,6 @@ body.app-ready #app {
     font-size: calc(12 * var(--width-multiplier));
   }
 
-  #startJourneyButton {
-    order: 4;
-    flex-grow: 1;
-    padding: calc(10 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
-    font-size: calc(12 * var(--width-multiplier));
-  }
-
   #watchTrailerButton {
     order: 5;
     flex-grow: 1;
@@ -1904,8 +1730,6 @@ body.app-ready #app {
     justify-content: center;
     padding: calc(10 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
     border-radius: calc(100 * var(--width-multiplier));
-    /* background: rgba(31, 31, 31, 0.95);
-    color: #ffffff; */
     font-size: calc(14 * var(--width-multiplier));
     font-weight: 600;
     line-height: 1;
