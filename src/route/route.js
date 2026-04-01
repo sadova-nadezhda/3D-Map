@@ -246,7 +246,7 @@ export function createRouteController({ scene, state }) {
     clampPointToMap,
   }) {
     // Здесь перечислены пары городов, для которых маршрут задается вручную.
-    if (isRoutePair(fromCityKey, toCityKey, 'city_aqtay', 'city_turk')) {
+    if (isRoutePair(fromCityKey, toCityKey, 'city_aqtay', 'city_shym')) {
       return createAktauTurkestanCurve({
         start,
         end,
@@ -264,7 +264,7 @@ export function createRouteController({ scene, state }) {
       });
     }
 
-    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_turk')) {
+    if (isRoutePair(fromCityKey, toCityKey, 'city_atyrau', 'city_shym')) {
       return createAtyrauTurkestanCurve({
         start,
         end,
