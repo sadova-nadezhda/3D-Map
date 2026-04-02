@@ -51,6 +51,9 @@
   }
 
   .preloader__progress-value {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     font-size: calc(12 * var(--width-multiplier));
   }
 }
@@ -244,7 +247,8 @@
   .feature-panel__button--primary {
     flex: 1 1 auto;
     min-width: 0;
-    font-size: calc(15 * var(--width-multiplier));
+    padding: 0 calc(16px * var(--width-multiplier));
+    font-size: calc(14 * var(--width-multiplier));
   }
 
   .feature-panel__button--icon {
@@ -448,8 +452,8 @@
   }
 
   .city-tab {
-    padding: calc(10 * var(--width-multiplier)) calc(14 * var(--width-multiplier));
-    font-size: calc(12 * var(--width-multiplier));
+    padding: calc(10 * var(--width-multiplier)) calc(18 * var(--width-multiplier));
+    font-size: calc(16 * var(--width-multiplier));
   }
 }
 

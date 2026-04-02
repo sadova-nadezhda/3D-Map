@@ -56,14 +56,14 @@ export const UI_TRANSLATIONS = {
   kk: {
     brand: 'StreetХана',
     kinopoisk: 'Кинопоискте қарау',
-    title: 'Қазақстандық стритфуд картасы',
-    subtitle: 'Қазақстандағы көше тағамдары әлеміне саяхатқа аттаныңыз. «STREETХАНА» сериалын Кинопоиск желісінен тамашалаңыз.',
+    title: 'Қазақстанның стритфуд картасы',
+    subtitle: 'Қазақстан бойынша саяхатқа аттанып, көше тағамдарының әлемін зерттеңіз. «STREETXAHA» сериалын Кинопоисктен тамашаланыз”.',
     featureStory: 'Теңіз аспаз болуды армандайды, бірақ жарыста жеңіліс оның жоспарын өзгертеді. Тағдыр бақытқа апарар ең жақсы жолды білетіні туралы жүрекке жылы тиетін комедия.',
     featureAction: 'Кинопоисктен көру',
     featureMap: 'Картаға оралу',
     startJourney: 'Сапарды басту',
     continueJourney: 'Маршрутты жалғастыру',
-    watchTrailer: 'Трейлерді қараңыз',
+    watchTrailer: 'Трейлерді көру',
     closeCard: 'Карточкасын жабу',
     closeModal: 'Қаланың карточкасын жабу',
     closeHint: 'Кеңесті жабу',
@@ -124,7 +124,7 @@ export const CITY_CONTENT = {
       venueTitle: 'Бургеры и жареная курица',
       tag: 'Астана',
       previewDescription:
-        'В Астане стритфуд любят за простоту и скорость: чаще всего выбирают бургеры и жареную курицу.',
+        'В Астане стритфуд любят за простоту и скорость: бургеры и жареная курица — любимчики горожан.',
       description:
         'Как и в любую столицу, сюда приезжают учиться, работать, запускать бизнес и пробовать себя в новом. Здесь легко найти кухню на любой вкус, но когда речь заходит о стритфуде, астанчане чаще всего выбирают простые и популярные варианты.',
       dishTitle: 'Главные фавориты города',
@@ -246,6 +246,7 @@ export const CITY_CONTENT = {
       title: 'Karaganda',
       venueTitle: 'Cafe "Tary"',
       tag: 'Karaganda',
+      emphasizedSection: 'dish',
       previewDescription:
         'A café with northern character, generous portions, and warm family dinners after a long journey.',
       description:
@@ -297,6 +298,7 @@ export const CITY_CONTENT = {
       title: 'Aktau',
       venueTitle: 'Cafe "Caspian Table"',
       tag: 'Aktau',
+      emphasisMode: 'last',
       previewDescription:
         'A bright seaside café with relaxed atmosphere, open kitchen, and dishes perfect after seaside strolls.',
       description:
@@ -331,6 +333,7 @@ export const CITY_CONTENT = {
       title: 'Kostanay',
       venueTitle: 'Cafe "Tobol"',
       tag: 'Kostanay',
+      emphasisMode: 'last',
       previewDescription:
         'A calm spot in central Kostanay where hot pastries and hearty meat dishes hit especially well after a walk by the Tobol River.',
       description:
