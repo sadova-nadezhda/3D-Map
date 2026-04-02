@@ -117,7 +117,7 @@
   padding: calc(8 * var(--width-multiplier)) calc(20 * var(--width-multiplier));
   border: 0;
   border-radius: calc(100 * var(--width-multiplier));
-  font-size: calc(14 * var(--width-multiplier));
+  font-size: calc(16 * var(--width-multiplier));
   font-weight: 600;
   cursor: pointer;
   transition:
