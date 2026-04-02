@@ -204,10 +204,10 @@
   transform: translate(-50%, -50%);
   border: 0;
   border-radius: calc(999 * var(--width-multiplier));
-  padding: calc(8 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
+  padding: calc(12 * var(--width-multiplier)) calc(20 * var(--width-multiplier));
   background: rgba(255, 249, 244, 0.92);
   color: #4f332c;
-  font-size: calc(14 * var(--width-multiplier));
+  font-size: calc(20 * var(--width-multiplier));
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -318,10 +318,10 @@
   flex: 0 0 auto;
   border: 0;
   border-radius: calc(100 * var(--width-multiplier));
-  padding: calc(8 * var(--width-multiplier)) calc(16 * var(--width-multiplier));
+  padding: calc(12 * var(--width-multiplier)) calc(20 * var(--width-multiplier));
   background: rgba(255, 255, 255, 1);
   color: rgba(31, 31, 31, 0.95);
-  font-size: calc(12 * var(--width-multiplier));
+  font-size: calc(18 * var(--width-multiplier));
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -394,20 +394,20 @@
 }
 
 .map-panel__title {
-  max-width: calc(470 * var(--width-multiplier));
+  /* max-width: calc(470 * var(--width-multiplier)); */
   margin: 0;
   color: #1f1f1f;
-  font-size: clamp(calc(24 * var(--width-multiplier)), 4.2vw, calc(42 * var(--width-multiplier)));
+  font-size: clamp(calc(24 * var(--width-multiplier)), 4vw, calc(64 * var(--width-multiplier)));
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.05em;
 }
 
 .map-panel__subtitle {
-  max-width: calc(600 * var(--width-multiplier));
+  max-width: calc(640 * var(--width-multiplier));
   margin: calc(16 * var(--width-multiplier)) 0 0;
   color: #1f1f1f;
-  font-size: calc(18 * var(--width-multiplier));
+  font-size: calc(20 * var(--width-multiplier));
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: -0.02em;
