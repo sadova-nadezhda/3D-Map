@@ -4,7 +4,6 @@ export function createVanController({
   scene,
   state,
   route,
-  modal,
   labels,
   cityTabs,
 }) {
@@ -119,7 +118,6 @@ export function createVanController({
         labels.updateAvailability();
         cityTabs.updateAvailability();
         cityTabs.setActiveCity(arrivedCity);
-        modal.showPreview(arrivedCity);
         state.pendingModalCity = null;
       }
     }

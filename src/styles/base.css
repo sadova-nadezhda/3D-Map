@@ -73,6 +73,54 @@
 }
 
 @font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_24pt-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'SangBleuSunrise';
   src: url('/fonts/SangBleuSunrise-Air.ttf') format('truetype');
   font-weight: 100;
@@ -158,6 +206,7 @@
 
 :root {
   color-scheme: dark;
+  --font-sans: 'GraphikKinopoiskLC', Arial, sans-serif;
   --bg: #151515;
   --text: #ffffff;
   --ink: #101828;
@@ -176,12 +225,17 @@
   --feature-shift: calc(-1 * (var(--panel-height) + var(--shell-gap)));
 }
 
+html[data-language='kz'],
+html[lang='kk'] {
+  --font-sans: 'Inter', Arial, sans-serif;
+}
+
 html,
 body {
   margin: 0;
   min-height: 100%;
   background: #252525;
-  font-family: 'GraphikKinopoiskLC', Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 body {

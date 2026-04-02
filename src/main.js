@@ -206,8 +206,8 @@ function initializeStaticTexts() {
 }
 
 const mobileIsoOffset = new THREE.Vector3(-2.9, 4.6, 2.7);
-const desktopOverviewTarget = new THREE.Vector3(0, 0.55, 0);
-const desktopOverviewOffset = new THREE.Vector3(3, 5.45, 4.5);
+const desktopOverviewTarget = new THREE.Vector3(-0.8, 0, 0);
+const desktopOverviewOffset = new THREE.Vector3(3, 5, 4.5);
 const desktopPanTarget = desktopOverviewTarget.clone();
 const mobileOverviewTarget = new THREE.Vector3(0.15, 0.55, 0);
 const mobileOverviewOffset = new THREE.Vector3(0.75, 6.75, 5.8);
@@ -418,6 +418,7 @@ const cityTabs = createCityTabsController({
   cityContent: getCityContent(),
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
+  isInteractionLocked: () => state.isMoving,
 });
 
 const route = createRouteController({
@@ -686,9 +687,15 @@ function getJourneyTargetCityKey() {
 }
 
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
-  if (state.isMoving) return;
   if (!i18n.getCityContent(cityKey)) return;
   if (!state.availableCities.has(cityKey)) return;
+
+  if (state.isMoving) {
+    if (cityKey === state.pendingModalCity || cityKey === state.activeCity) {
+      modal.showPreview(cityKey);
+    }
+    return;
+  }
 
   markJourneyStarted();
   hideMapHint();
@@ -726,6 +733,8 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
     fromCityKey: previousCityKey,
     toCityKey: cityKey,
   });
+
+  modal.showPreview(cityKey);
 }
 
 function openJourneyStart() {

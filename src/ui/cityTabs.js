@@ -4,6 +4,7 @@ export function createCityTabsController({
   cityContent,
   onSelectCity,
   isCityAvailable,
+  isInteractionLocked = () => false,
 }) {
   const tabMap = new Map();
   let currentCityContent = cityContent;
@@ -23,6 +24,7 @@ export function createCityTabsController({
 
       button.addEventListener('click', () => {
         if (!isCityAvailable(cityKey)) return;
+        if (isInteractionLocked()) return;
         onSelectCity(cityKey);
       });
 
@@ -41,8 +43,9 @@ export function createCityTabsController({
   function updateAvailability() {
     tabMap.forEach((button, key) => {
       const available = isCityAvailable(key);
-      button.classList.toggle('disabled', !available);
-      button.disabled = !available;
+      const disabled = !available || isInteractionLocked();
+      button.classList.toggle('disabled', disabled);
+      button.disabled = disabled;
     });
   }
 
