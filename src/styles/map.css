@@ -411,6 +411,15 @@
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: -0.02em;
+  pointer-events: auto;
+}
+
+.map-panel__subtitle a {
+  transition: color 0.3s ease-out;
+}
+
+.map-panel__subtitle a:hover {
+  color: #ff5a14;
 }
 
 #watchTrailerButton::before {

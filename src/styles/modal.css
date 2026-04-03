@@ -284,6 +284,14 @@
   margin: 0;
 }
 
+.detail-modal__paragraph a {
+  transition: color 0.3s ease-out;
+}
+
+.detail-modal__paragraph a:hover {
+  color: #ff5a14;
+}
+
 .detail-modal__paragraph--emphasis {
   font-weight: 500;
 }

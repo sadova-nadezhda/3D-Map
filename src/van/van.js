@@ -4,8 +4,7 @@ export function createVanController({
   scene,
   state,
   route,
-  labels,
-  cityTabs,
+  onArrival = () => {},
 }) {
   function centerCarModel(model) {
     const box = new THREE.Box3().setFromObject(model);
@@ -112,13 +111,7 @@ export function createVanController({
 
       if (state.pendingModalCity) {
         const arrivedCity = state.pendingModalCity;
-
-        state.completedCities.add(arrivedCity);
-
-        labels.updateAvailability();
-        cityTabs.updateAvailability();
-        cityTabs.setActiveCity(arrivedCity);
-        state.pendingModalCity = null;
+        onArrival(arrivedCity);
       }
     }
   }

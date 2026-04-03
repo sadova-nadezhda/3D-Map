@@ -123,7 +123,6 @@ export async function loadScene({
   van.setupVan(carModel);
 
   const firstCityKey = routeOrder[0];
-
   routeOrder.forEach((cityKey) => {
     if (state.cityPositions.has(cityKey)) {
       state.availableCities.add(cityKey);

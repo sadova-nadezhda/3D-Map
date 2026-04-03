@@ -49,10 +49,8 @@ export function createRouteController({ scene, state }) {
     24
   );
 
-  function clearRoute() {
-    const routeGroups = scene.children.filter(
-      (child) => child.userData?.isRouteGroup
-    );
+  function removeRouteGroups(predicate) {
+    const routeGroups = scene.children.filter(predicate);
 
     routeGroups.forEach((group) => {
       scene.remove(group);
@@ -63,6 +61,10 @@ export function createRouteController({ scene, state }) {
         }
       });
     });
+  }
+
+  function clearRoute() {
+    removeRouteGroups((child) => child.userData?.isRouteGroup);
 
     state.routeGroup = null;
     state.routeRoadMesh = null;
@@ -70,6 +72,12 @@ export function createRouteController({ scene, state }) {
     state.routeStripeMesh = null;
     state.startPad = null;
     state.endPad = null;
+  }
+
+  function clearQueuedRoutes() {
+    removeRouteGroups(
+      (child) => child.userData?.isRouteGroup && child.userData?.isQueuedRoute
+    );
   }
 
   function getRouteKey(fromCityKey, toCityKey) {
@@ -336,7 +344,7 @@ export function createRouteController({ scene, state }) {
   }
 
   function buildRoute(curve, routeY, options = {}) {
-    const { fromCityKey = null, toCityKey = null } = options;
+    const { fromCityKey = null, toCityKey = null, routeType = 'active' } = options;
     const routeKey = getRouteKey(fromCityKey, toCityKey);
 
     if (routeKey) {
@@ -345,14 +353,21 @@ export function createRouteController({ scene, state }) {
       );
 
       if (existingRouteGroup) {
+        if (routeType !== 'queued') {
+          existingRouteGroup.userData.isQueuedRoute = false;
+          existingRouteGroup.userData.routeType = routeType;
+        }
+
         state.routeGroup = existingRouteGroup;
-        return;
+        return existingRouteGroup;
       }
     }
 
     state.routeGroup = new THREE.Group();
     state.routeGroup.userData.isRouteGroup = true;
     state.routeGroup.userData.routeKey = routeKey;
+    state.routeGroup.userData.routeType = routeType;
+    state.routeGroup.userData.isQueuedRoute = routeType === 'queued';
 
     const routeSegments = 220;
 
@@ -419,10 +434,12 @@ export function createRouteController({ scene, state }) {
     state.routeGroup.add(state.endPad);
 
     scene.add(state.routeGroup);
+    return state.routeGroup;
   }
 
   return {
     clearRoute,
+    clearQueuedRoutes,
     createElegantRouteCurve,
     createRibbonGeometry,
     buildRoute,

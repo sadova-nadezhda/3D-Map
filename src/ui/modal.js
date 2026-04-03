@@ -1,5 +1,8 @@
 import { i18n } from '../core/i18n.js';
 
+const STREET_HANA_URL = 'https://www.kinopoisk.ru/series/8550566/';
+const STREET_HANA_PATTERN = /STREETХАНА|STREETXAHA/g;
+
 const CITY_MAP_EMBEDS = {
   city_almaty:
     '<iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A24efcd186f45037f85fe5fc9476a71615db02ecb0c5b9e7b6bb9bea3520c774e&amp;source=constructor" width="420" height="300" frameborder="0"></iframe>',
@@ -78,6 +81,100 @@ export function createModalController({
   onPreviewShown = () => {},
 }) {
   let activeCityKey = null;
+  const PANEL_SWITCH_MS = 220;
+
+  let switchTimerId = null;
+  let switchToken = 0;
+
+  function escapeHtml(text) {
+    return String(text)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function linkifyStreetHana(text) {
+    const safeText = escapeHtml(text);
+
+    return safeText.replace(
+      STREET_HANA_PATTERN,
+      `<a href="${STREET_HANA_URL}" target="_blank" rel="noopener noreferrer">$&</a>`
+    );
+  }
+
+  function cancelPendingSwitch() {
+    switchToken += 1;
+
+    if (switchTimerId) {
+      window.clearTimeout(switchTimerId);
+      switchTimerId = null;
+    }
+  }
+
+  function setPreviewOpen(isOpen) {
+    previewCard.classList.toggle('active', isOpen);
+    previewCard.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  }
+
+  function setDetailOpen(isOpen) {
+    detailOverlay.classList.toggle('active', isOpen);
+    detailOverlay.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    document.body.classList.toggle('modal-open', isOpen);
+  }
+
+  function closeVisiblePanels() {
+    setPreviewOpen(false);
+    setDetailOpen(false);
+    syncPanelOverlay();
+  }
+
+  function openPreviewPanel() {
+    setPreviewOpen(true);
+    setDetailOpen(false);
+    syncPanelOverlay();
+  }
+
+  function openDetailPanel() {
+    setPreviewOpen(false);
+    setDetailOpen(true);
+    syncPanelOverlay();
+  }
+
+  function switchPanel(cityKey, openPanel, onOpen = () => {}) {
+    const hasVisiblePanel =
+      previewCard.classList.contains('active') || detailOverlay.classList.contains('active');
+    const shouldAnimateSwitch = hasVisiblePanel && activeCityKey && activeCityKey !== cityKey;
+
+    cancelPendingSwitch();
+
+    if (!shouldAnimateSwitch) {
+      const city = fillContent(cityKey);
+      if (!city) return;
+
+      openPanel();
+      onOpen();
+      return;
+    }
+
+    const currentToken = ++switchToken;
+    closeVisiblePanels();
+
+    switchTimerId = window.setTimeout(() => {
+      if (switchToken !== currentToken) {
+        return;
+      }
+
+      switchTimerId = null;
+
+      const city = fillContent(cityKey);
+      if (!city) return;
+
+      openPanel();
+      onOpen();
+    }, PANEL_SWITCH_MS);
+  }
 
   function getParagraphs(texts) {
     return texts
@@ -101,7 +198,7 @@ export function createModalController({
         paragraph.classList.add('detail-modal__paragraph--emphasis');
       }
 
-      paragraph.textContent = paragraphText;
+      paragraph.innerHTML = linkifyStreetHana(paragraphText);
       container.appendChild(paragraph);
     });
   }
@@ -178,7 +275,7 @@ export function createModalController({
 
     previewTag.textContent = city.tag;
     previewTitle.textContent = city.venueTitle;
-    previewDescription.textContent = city.previewDescription || city.description;
+    previewDescription.innerHTML = linkifyStreetHana(city.previewDescription || city.description);
     previewImage.style.backgroundImage = imageSrc ? `url("${imageSrc}")` : 'none';
 
     modalTitle.textContent = city.venueTitle;
@@ -212,40 +309,28 @@ export function createModalController({
   }
 
   function showPreview(cityKey) {
-    const city = fillContent(cityKey);
-    if (!city) return;
+    if (!cityKey || !cityContent[cityKey]) return;
 
-    previewCard.classList.add('active');
-    previewCard.setAttribute('aria-hidden', 'false');
-    detailOverlay.classList.remove('active');
-    detailOverlay.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
-    syncPanelOverlay();
-    onPreviewShown(cityKey);
+    switchPanel(cityKey, openPreviewPanel, () => {
+      onPreviewShown(cityKey);
+    });
   }
 
   function showDetail(cityKey = activeCityKey) {
-    const city = fillContent(cityKey);
-    if (!city) return;
+    if (!cityKey || !cityContent[cityKey]) return;
 
-    previewCard.classList.remove('active');
-    previewCard.setAttribute('aria-hidden', 'true');
-    detailOverlay.classList.add('active');
-    detailOverlay.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('modal-open');
-    syncPanelOverlay();
+    switchPanel(cityKey, openDetailPanel);
   }
 
   function hidePreview() {
-    previewCard.classList.remove('active');
-    previewCard.setAttribute('aria-hidden', 'true');
+    cancelPendingSwitch();
+    setPreviewOpen(false);
     syncPanelOverlay();
   }
 
   function hideDetail() {
-    detailOverlay.classList.remove('active');
-    detailOverlay.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
+    cancelPendingSwitch();
+    setDetailOpen(false);
     syncPanelOverlay();
   }
 

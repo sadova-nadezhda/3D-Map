@@ -73,7 +73,7 @@
 
             <div class="map-panel__hero-body">
               <h1 class="map-panel__title">Карта казахстанского стритфуда</h1>
-              <div class="map-panel__subtitle">Отправляйтесь в путешествие по миру уличной еды в Казахстане. Смотрите сериал «STREETХАНА» на Кинопоиске.</div>
+              <div class="map-panel__subtitle">Отправляйтесь в путешествие по миру уличной еды в Казахстане. <a href="https://www.kinopoisk.ru/series/8550566/" target="_blank" rel="noopener noreferrer">Смотрите сериал «STREETХАНА» на Кинопоиске.</a></div>
 
               <div class="map-panel__hero-actions">
                 <a id="watchTrailerButton" class="map-panel__hero-button map-panel__hero-button--primary" href="#featurePanel">
@@ -249,25 +249,26 @@
                   <img src="/media/btn-ico.svg" alt="" aria-hidden="true" />
                 </span>
               </a>
+              <a id="featureMapLink" class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M15 6.5L9 4L3 6.5V18L9 15.5L15 18L21 15.5V4L15 6.5Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M9 4V15.5M15 6.5V18"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <span id="featureMapLabel">Вернуться к карте</span>
+              </a>
             </div>
 
-            <a id="featureMapLink" class="feature-panel__map-link" href="#mapPanelSection" aria-label="Вернуться к карте">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M15 6.5L9 4L3 6.5V18L9 15.5L15 18L21 15.5V4L15 6.5Z"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M9 4V15.5M15 6.5V18"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <span id="featureMapLabel">К карте</span>
-            </a>
+            
           </div>
         </section>
       </main>

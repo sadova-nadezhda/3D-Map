@@ -123,9 +123,9 @@
 }
 
 .feature-panel__map-link {
-  position: absolute;
+  /* position: absolute;
   right: calc(32 * var(--width-multiplier));
-  bottom: calc(32 * var(--width-multiplier));
+  bottom: calc(32 * var(--width-multiplier)); */
   z-index: 2;
   display: inline-flex;
   align-items: center;

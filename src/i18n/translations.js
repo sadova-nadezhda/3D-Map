@@ -3,10 +3,10 @@ export const UI_TRANSLATIONS = {
     brand: 'StreetХана',
     kinopoisk: 'Смотреть на Кинопоиске',
     title: 'Карта казахстанского стритфуда',
-    subtitle: 'Отправляйтесь в путешествие по миру уличной еды в Казахстане. Смотрите сериал «STREETХАНА» на Кинопоиске.',
+    subtitle: 'Отправляйтесь в путешествие по миру уличной еды в Казахстане. <a href="https://www.kinopoisk.ru/series/8550566/" target="_blank" rel="noopener noreferrer">Смотрите сериал «STREETХАНА» на Кинопоиске.</a>',
     featureStory: 'Тениз мечтает стать шеф-поваром, но поражение в конкурсе меняет его планы. Тёплая комедия о том, что судьба знает лучший путь к счастью',
     featureAction: 'Смотреть на Кинопоиске',
-    featureMap: 'К карте',
+    featureMap: 'Вернуться к карте',
     startJourney: 'Начать поездку',
     continueJourney: 'Продолжить маршрут',
     watchTrailer: 'Смотреть трейлер',
@@ -30,10 +30,10 @@ export const UI_TRANSLATIONS = {
     brand: 'StreetHana',
     kinopoisk: 'View on Kinopoisk',
     title: 'Kazakhstani Street Food Map',
-    subtitle: 'Take a journey through the world of street food in Kazakhstan. Watch the series "STREETХАНА" on Kinopoisk.',
+    subtitle: 'Take a journey through the world of street food in Kazakhstan. <a href="https://www.kinopoisk.ru/series/8550566/" target="_blank" rel="noopener noreferrer">Watch the series "STREETХАНА" on Kinopoisk.</a>',
     featureStory: 'Teniz dreams of becoming a chef, but losing a competition changes his plans. A warm comedy about how fate knows the best path to happiness.',
     featureAction: 'Watch on Kinopoisk',
-    featureMap: 'Back to Map',
+    featureMap: 'Return to Map',
     startJourney: 'Start Journey',
     continueJourney: 'Continue Route',
     watchTrailer: 'Watch Trailer',
@@ -57,7 +57,7 @@ export const UI_TRANSLATIONS = {
     brand: 'StreetХана',
     kinopoisk: 'Кинопоискте қарау',
     title: 'Қазақстанның стритфуд картасы',
-    subtitle: 'Қазақстан бойынша саяхатқа аттанып, көше тағамдарының әлемін зерттеңіз. «STREETXAHA» сериалын Кинопоисктен тамашаланыз”.',
+    subtitle: 'Қазақстан бойынша саяхатқа аттанып, көше тағамдарының әлемін зерттеңіз. <a href="https://www.kinopoisk.ru/series/8550566/" target="_blank" rel="noopener noreferrer">«STREETХАНА» сериалын Кинопоисктен тамашалаңыз.</a>',
     featureStory: 'Теңіз аспаз болуды армандайды, бірақ жарыста жеңіліс оның жоспарын өзгертеді. Тағдыр бақытқа апарар ең жақсы жолды білетіні туралы жүрекке жылы тиетін комедия.',
     featureAction: 'Кинопоисктен көру',
     featureMap: 'Картаға оралу',
@@ -141,7 +141,7 @@ export const CITY_CONTENT = {
       venueTitle: 'Донер',
       tag: 'Актобе',
       previewDescription:
-        'В Актобе донер давно стал идеальным перекусом по дороге - сытным, быстрым и понятным.',
+        'В Актобе донер давно стал идеальным перекусом по дороге — сытным, быстрым и понятным.',
       description:
         'Актобе не самый большой, но зелёный: дворы, парки и даже садовые товарищества прямо в городе. Здесь много ходят пешком, поэтому актуально зацепить что-то вкусное по дороге. Донер в этом смысле — идеальный вариант для быстрого перекуса: тонкий лаваш, сочное мясо с вертела, хрустящие овощи, картошка, соус и халапеньо — ммм, невозможно устоять!',
       dishTitle: 'Где искать хороший донер',
@@ -176,7 +176,7 @@ export const CITY_CONTENT = {
       venueTitle: 'Шашлык',
       tag: 'Шымкент',
       previewDescription:
-        'В Шымкенте шашлык - повседневная еда: доступная, щедрая и почти на каждом шагу.',
+        'В Шымкенте шашлык — повседневная еда: доступная, щедрая и почти на каждом шагу.',
       description:
         'Где-где, а в Шымкенте вы точно не останетесь голодными. Смешение казахской и узбекской культур сделали своё дело: еда здесь повсюду, а главное — с щедрыми порциями и очень вкусная. Особенно это чувствуется в шашлычных, которых в городе десятки, если не сотни.',
       dishTitle: 'Что брать в первую очередь',
@@ -237,7 +237,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'Samsa is traditionally cooked in a tandoor to make the dough crispy while keeping the filling juicy. In Almaty, it\'s usually made with lamb or beef, seasoned with onions and spices.',
       placeDescription:
-        'This family establishment has been operating since 1992. Head chef Abdullah makes samsa every morning using his grandfather\'s recipe. Locals love this place for its authenticity, generous portions, and homey atmosphere.',
+        'This family establishment has been operating since 1992. Head chef Abdullah makes samsa every morning using his grandfather\'s recipe. Locals love this place for its authenticity, generous portions, and homey atmosphere.\n\nTeniz, the main character of STREETХАНА, comes to Almaty to pursue his chef career. Will he manage to conquer the cultural capital? Watch on Kinopoisk.',
       imageLabel: 'Samsa and Tea',
       accent: '#ff6a00',
       mapLink: 'https://yandex.ru/maps/?text=Navat%20Almaty',
@@ -272,7 +272,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'Fluffy baursaks are served warm with thick kaymak and honey. In Astana, they\'re often ordered with tea, especially in groups that like to share dishes.',
       placeDescription:
-        'The gastrobar team focuses on local products and careful service. In the evenings, people come here after strolls along the left bank to experience the vibe of the big city.',
+        'The gastrobar team focuses on local products and careful service. In the evenings, people come here after strolls along the left bank to experience the vibe of the big city.\n\nIn STREETХАНА, Teniz is not afraid to experiment either and comes up with a new dish called shaursak, meant to win over street-food lovers.',
       imageLabel: 'Baursaks',
       accent: '#ff9a3d',
       mapLink: 'https://yandex.ru/maps/?text=Qazaq%20Republic%20Astana',
@@ -289,7 +289,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'Homemade noodles are cooked in rich broth, with thin slices of horse meat added just before serving. It\'s hearty, aromatic, and very homey.',
       placeDescription:
-        'The bistro is known for quick service and large seating capacity. People come for lunch during the day and in large groups for evening meals, ordering a shared table with appetizers and soups.',
+        'The bistro is known for quick service and large seating capacity. People come for lunch during the day and in large groups for evening meals, ordering a shared table with appetizers and soups.\n\nCould shaursak become our new doner? Follow STREETХАНА so you do not miss the rise of a new Kazakh dish.',
       imageLabel: 'Kespe',
       accent: '#f07b3b',
       mapLink: 'https://yandex.ru/maps/?text=Dastarhan%20Aktobe',
@@ -324,7 +324,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'Meat is marinated quickly but intensely, then grilled on high heat until golden brown. Served with thin onions, sauce, and hot flatbread right off the skewers.',
       placeDescription:
-        'Known for long evening gatherings and weekend music. If you want to feel Shymkent\'s temperament, this is one of the best places to visit.',
+        'Known for long evening gatherings and weekend music. If you want to feel Shymkent\'s temperament, this is one of the best places to visit.\n\nIn STREETХАНА, Teniz creates his shaursak by combining shashlik and baursak. If you ever want to recreate that recipe, Shymkent is the place to start.',
       imageLabel: 'Shashlik',
       accent: '#ff5c28',
       mapLink: 'https://yandex.ru/maps/?text=%D0%94%D0%B0%D1%81%D1%82%D0%B0%D1%80%D1%85%D0%B0%D0%BD%20%D0%A8%D1%8B%D0%BC%D0%BA%D0%B5%D0%BD%D1%82',
@@ -342,7 +342,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'These pies are made with thin dough and juicy meat filling, then served piping hot. It is a perfect street-food format: filling, quick, and easy to eat on the move.',
       placeDescription:
-        'Locals appreciate the cafe for its consistent quality, quick service, and easygoing atmosphere. In the evenings, people often stop by for hot pastries and tea after walking through the city center.',
+        'Locals appreciate the cafe for its consistent quality, quick service, and easygoing atmosphere. In the evenings, people often stop by for hot pastries and tea after walking through the city center.\n\nIt may seem hard to invent something new from dough and filling, but Teniz, the main character of STREETХАНА, manages to do exactly that. See how on Kinopoisk.',
       imageLabel: 'Meat Pies',
       accent: '#d69054',
       mapLink: 'https://yandex.ru/maps/?text=Tobol%20Kostanay',
@@ -359,7 +359,7 @@ export const CITY_CONTENT = {
       dishDescription:
         'The manti are steamed so the dough stays tender while the pumpkin-and-meat filling remains juicy. It is a warm, hearty dish that suits the cooler climate of East Kazakhstan especially well.',
       placeDescription:
-        'Located near the city center, the bistro follows the rhythm of the city: fast at lunch and calmer in the evening. Regulars value it for neat presentation and dependable flavor.',
+        'Located near the city center, the bistro follows the rhythm of the city: fast at lunch and calmer in the evening. Regulars value it for neat presentation and dependable flavor.\n\nIf you like watching something while you eat, turn on STREETХАНА on Kinopoisk and follow Teniz as he tries to conquer Kazakhstan\'s culinary scene.',
       imageLabel: 'Manti',
       accent: '#ff8a5b',
       mapLink: 'https://yandex.ru/maps/?text=Altai%20Street%20Ust-Kamenogorsk',

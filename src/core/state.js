@@ -9,6 +9,7 @@ export function createAppState() {
 
     activeCity: null,
     pendingModalCity: null,
+    queuedCities: [],
     availableCities: new Set(),
     completedCities: new Set(),
 

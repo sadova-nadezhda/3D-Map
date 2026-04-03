@@ -134,7 +134,7 @@ function initializeStaticTexts() {
 
   const subtitleElement = document.querySelector('.map-panel__subtitle');
   if (subtitleElement) {
-    subtitleElement.textContent = i18n.getUiText('subtitle');
+    subtitleElement.innerHTML = i18n.getUiText('subtitle');
   }
 
   if (watchTrailerButton) {
@@ -359,18 +359,6 @@ const modal = createModalController({
   modalMapLink,
   modalMapContainer,
   modalImage,
-  onPreviewShown: (cityKey) => {
-    const currentIndex = ROUTE_ORDER.indexOf(cityKey);
-    const nextCity = ROUTE_ORDER[currentIndex + 1];
-
-    if (!nextCity) {
-      return;
-    }
-
-    state.availableCities.add(nextCity);
-    labels.updateAvailability();
-    cityTabs.updateAvailability();
-  },
 });
 
 if (
@@ -408,7 +396,7 @@ const labels = createLabelsController({
   camera: sceneContext.camera,
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
-  isInteractionLocked: () => state.isMoving,
+  isInteractionLocked: () => false,
   viewportElement: container,
 });
 
@@ -418,7 +406,7 @@ const cityTabs = createCityTabsController({
   cityContent: getCityContent(),
   onSelectCity: (cityKey) => selectCity(cityKey),
   isCityAvailable,
-  isInteractionLocked: () => state.isMoving,
+  isInteractionLocked: () => false,
 });
 
 const route = createRouteController({
@@ -430,10 +418,7 @@ const van = createVanController({
   scene: sceneContext.scene,
   state,
   route,
-  modal,
-  labels,
-  cityTabs,
-  routeOrder: ROUTE_ORDER,
+  onArrival: handleCityArrival,
 });
 
 function updateCameraLayout() {
@@ -686,16 +671,128 @@ function getJourneyTargetCityKey() {
   return firstAvailableCity || ROUTE_ORDER[0] || null;
 }
 
+function queueCity(cityKey) {
+  if (!cityKey || cityKey === state.activeCity || cityKey === state.pendingModalCity) {
+    return;
+  }
+
+  const existingIndex = state.queuedCities.indexOf(cityKey);
+  if (existingIndex >= 0) {
+    state.queuedCities.splice(existingIndex, 1);
+  }
+
+  state.queuedCities.push(cityKey);
+}
+
+function getNextQueuedCity() {
+  while (state.queuedCities.length) {
+    const nextCity = state.queuedCities.shift();
+
+    if (
+      nextCity &&
+      nextCity !== state.activeCity &&
+      nextCity !== state.pendingModalCity &&
+      state.cityPositions.has(nextCity)
+    ) {
+      return nextCity;
+    }
+  }
+
+  return null;
+}
+
+function renderQueuedRoutes() {
+  route.clearQueuedRoutes();
+
+  if (!state.queuedCities.length) {
+    return;
+  }
+
+  let fromCityKey = state.pendingModalCity || state.activeCity;
+  let fromPoint = fromCityKey ? state.cityPositions.get(fromCityKey) : null;
+
+  if (!fromPoint) {
+    return;
+  }
+
+  state.queuedCities.forEach((toCityKey) => {
+    const toPoint = state.cityPositions.get(toCityKey);
+
+    if (!toPoint || toCityKey === fromCityKey) {
+      return;
+    }
+
+    const routeY = Math.max(fromPoint.y, toPoint.y) + state.ROUTE_Y_OFFSET;
+    const curve = route.createElegantRouteCurve(
+      fromPoint.clone(),
+      toPoint.clone(),
+      routeY,
+      {
+        fromCityKey,
+        toCityKey,
+      }
+    );
+
+    route.buildRoute(curve, routeY, {
+      fromCityKey,
+      toCityKey,
+      routeType: 'queued',
+    });
+
+    fromCityKey = toCityKey;
+    fromPoint = toPoint;
+  });
+}
+
+function startRouteToCity(cityKey) {
+  const nextPoint = state.cityPositions.get(cityKey);
+
+  if (!nextPoint || !state.vanRoot) {
+    return false;
+  }
+
+  state.pendingModalCity = cityKey;
+
+  const start = state.vanRoot.position.clone();
+  const end = nextPoint.clone();
+
+  van.startRoute(start, end, {
+    fromCityKey: state.activeCity,
+    toCityKey: cityKey,
+  });
+
+  renderQueuedRoutes();
+  labels.updateAvailability();
+  cityTabs.updateAvailability();
+  return true;
+}
+
+function handleCityArrival(cityKey) {
+  if (!cityKey) {
+    return;
+  }
+
+  state.pendingModalCity = null;
+  state.activeCity = cityKey;
+  state.completedCities.add(cityKey);
+
+  labels.setActiveLabel(cityKey);
+  cityTabs.setActiveCity(cityKey);
+  labels.updateAvailability();
+  cityTabs.updateAvailability();
+
+  const nextQueuedCity = getNextQueuedCity();
+  if (nextQueuedCity) {
+    startRouteToCity(nextQueuedCity);
+    return;
+  }
+
+  renderQueuedRoutes();
+}
+
 selectCity = function selectCityHandler(cityKey, skipRoute = false) {
   if (!i18n.getCityContent(cityKey)) return;
   if (!state.availableCities.has(cityKey)) return;
-
-  if (state.isMoving) {
-    if (cityKey === state.pendingModalCity || cityKey === state.activeCity) {
-      modal.showPreview(cityKey);
-    }
-    return;
-  }
 
   markJourneyStarted();
   hideMapHint();
@@ -705,11 +802,6 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 
   if (!nextPoint || !state.vanRoot) return;
 
-  const previousCityKey = state.activeCity;
-  state.activeCity = cityKey;
-  labels.setActiveLabel(cityKey);
-  cityTabs.setActiveCity(cityKey);
-
   if (sameCity && !state.isMoving) {
     modal.showPreview(cityKey);
     return;
@@ -717,24 +809,30 @@ selectCity = function selectCityHandler(cityKey, skipRoute = false) {
 
   if (skipRoute) {
     state.activeRouteY = nextPoint.y + state.ROUTE_Y_OFFSET;
+    state.pendingModalCity = null;
+    state.queuedCities = [];
+    state.activeCity = cityKey;
+    state.completedCities.add(cityKey);
     van.setVanPositionFromPoint(nextPoint);
     route.clearRoute();
     modal.hideAll();
+    labels.setActiveLabel(cityKey);
+    cityTabs.setActiveCity(cityKey);
+    labels.updateAvailability();
+    cityTabs.updateAvailability();
     return;
   }
 
-  modal.hideAll();
-  state.pendingModalCity = cityKey;
-
-  const start = state.vanRoot.position.clone();
-  const end = nextPoint.clone();
-
-  van.startRoute(start, end, {
-    fromCityKey: previousCityKey,
-    toCityKey: cityKey,
-  });
+  if (state.isMoving) {
+    modal.showPreview(cityKey);
+    queueCity(cityKey);
+    renderQueuedRoutes();
+    return;
+  }
 
   modal.showPreview(cityKey);
+  state.queuedCities = state.queuedCities.filter((queuedCity) => queuedCity !== cityKey);
+  startRouteToCity(cityKey);
 }
 
 function openJourneyStart() {
@@ -804,8 +902,6 @@ function onMapClick(event) {
   if (performance.now() < suppressMapClickUntil) {
     return;
   }
-
-  if (state.isMoving) return;
 
   const rect = sceneContext.renderer.domElement.getBoundingClientRect();
 

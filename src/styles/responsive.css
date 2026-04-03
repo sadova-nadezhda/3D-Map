@@ -262,9 +262,11 @@
   }
 
   .feature-panel__map-link {
-    right: calc(16 * var(--width-multiplier));
+    /* right: calc(16 * var(--width-multiplier));
     top: calc(16 * var(--width-multiplier));
-    bottom: auto;
+    bottom: auto; */
+    justify-content: center;
+    width: 100%;
     min-height: calc(42 * var(--width-multiplier));
     padding: 0 calc(14 * var(--width-multiplier));
     gap: calc(8 * var(--width-multiplier));
